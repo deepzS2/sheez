@@ -37,11 +37,16 @@
           ];
           commands = [
             {
-              help = "run quickshell in current directory";
-              name = "dev";
-              command = "qs -c $PRJ_ROOT";
+              help = "run quickshell ipc commands";
+              name = "ipc";
+              command = "qs -c $PRJ_ROOT ipc $*";
             }
           ];
+          serviceGroups.dev.services = {
+            sheez-dev = {
+              command = "qs -c $PRJ_ROOT";
+            };
+          };
           packages = [
             # nix
             pkgs.alejandra
