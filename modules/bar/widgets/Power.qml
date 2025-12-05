@@ -1,6 +1,6 @@
 import QtQuick
-import Quickshell
 import qs.commons
+import qs.modules.logoutmenu.services
 import qs.widgets
 
 Rectangle {
@@ -9,12 +9,12 @@ Rectangle {
     implicitWidth: powerText.implicitWidth + Styles.widgetPadding * 2
     implicitHeight: Styles.capsuleHeight
     radius: Styles.widgetRadius
-        color: Colors.error
+    color: Colors.error
     opacity: Styles.widgetOpacity
 
     border {
         width: Styles.widgetBorderWidth
-    color: Colors.error
+        color: Colors.error
     }
 
     // Shadow effect
@@ -35,7 +35,7 @@ Rectangle {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            Quickshell.execDetached(["powermenu"]);
+            LogoutMenuService.logoutMenuEl.isVisible = true;
         }
     }
 
