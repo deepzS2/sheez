@@ -54,8 +54,8 @@ Scope {
                 left: 25
             }
 
-            width: rect.width
-            height: rect.height
+            implicitWidth: rect.width
+            implicitHeight: rect.height
 
             // color blending is a bit odd as detailed in the type reference.
             color: "transparent"
