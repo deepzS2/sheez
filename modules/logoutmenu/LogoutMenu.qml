@@ -13,7 +13,7 @@ Variants {
 
     property bool isVisible: false
     property color backgroundColor: Qt.alpha(Colors.background, 0.75)
-    property color buttonColor: Colors.surfaceContainer
+    property color buttonColor: Qt.alpha(Colors.surfaceContainer, 0.8)
     property color buttonHoverColor: Colors.primaryFixed
     property color buttonTextColor: Colors.conSurface
     property color buttonHoverTextColor: Colors.conPrimaryFixed
@@ -115,7 +115,7 @@ Variants {
 
                         width: parent.width * 0.75
                         height: parent.height * 0.25
-                        spacing: 16
+                        spacing: 24
 
                         Repeater {
                             model: root.buttons

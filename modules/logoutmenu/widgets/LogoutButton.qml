@@ -8,6 +8,7 @@ Rectangle {
 
     Layout.fillWidth: true
     Layout.fillHeight: true
+    radius: 32
 
     property color textColor: "white"
     required property string text
