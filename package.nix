@@ -28,7 +28,7 @@ in
   stdenvNoCC.mkDerivation {
     inherit runtimeDeps;
 
-    pname = "my-shell";
+    pname = "sheez";
     version = "1.0.0";
 
     src = ./.;
