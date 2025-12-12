@@ -11,11 +11,13 @@ Sheez is a minimal, extensible desktop bar built with [Quickshell](https://git.o
 - **Supported compositors**: Niri and Hyprland
 - **Dynamic theming**: Automatic color generation from wallpapers using [matugen](https://github.com/InioX/matugen)
 - **Logout Menu**: Power management interface providing shutdown, reboot, lock, suspend, and logout options with keyboard shortcuts
+- **Lockscreen**: Secure session locking with Wayland protocol support
 
 ## Screenshots
 
 ![Bar preview](./docs/bar.png)
 ![Logout Menu preview](./docs/logout-menu.png)
+![Lockscreen preview](./docs/lockscreen.png)
 
 ## Installation
 
@@ -95,6 +97,7 @@ Then run `sheez` to launch the bar.
 - [Caelestia Shell](https://github.com/caelestia-dev/shell) - Beautiful shell design inspiration
 - [adi1090x Rofi repository](https://github.com/adi1090x/rofi) - Inspiration for the Logout Menu
 - [Noctalia Shell](https://github.com/noctalia-dev/shell) - Creative shell concepts and features
+- [Hyprlock-Styles](https://github.com/MrVivekRajan/Hyprlock-Styles) - Inspiration for the lockscreen design
 - [Matugen](https://github.com/InioX/matugen) - Dynamic color theming from wallpapers
 - [Nerd Fonts](https://www.nerdfonts.com/) - Beautiful icons
 - The Nix and Wayland communities
