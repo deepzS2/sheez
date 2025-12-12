@@ -76,6 +76,20 @@ Add sheez to your flake inputs and include it in your packages:
 
 Then run `sheez` to launch the bar.
 
+## IPC Commands
+
+Sheez supports inter-process communication (IPC) for controlling various components:
+
+- `logout toggle`: Toggle the logout menu
+- `lockScreen toggle`: Toggle the lockscreen
+
+You can send IPC commands using quickshell's IPC interface:
+
+```bash
+sheez ipc call logout toggle
+sheez ipc call lockScreen toggle
+```
+
 ## Contributing
 
 1. Fork the repository
