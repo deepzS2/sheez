@@ -21,6 +21,8 @@
     pavucontrol
     blueman
     nerd-fonts.jetbrains-mono
+    atkinson-hyperlegible-next
+    texlivePackages.alfaslabone
   ];
 
   fontconfig = makeFontsConf {
@@ -52,7 +54,7 @@ in
 
     preFixup = ''
       qtWrapperArgs+=(
-        --prefix PATH:${lib.makeBinPath runtimeDeps}
+        --prefix PATH : ${lib.makeBinPath runtimeDeps}
         --set FONTCONFIG_FILE ${fontconfig}
         --add-flags "-p $out/share/sheez"
       )
