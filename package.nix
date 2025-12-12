@@ -12,6 +12,8 @@
   blueman,
   # fonts
   nerd-fonts,
+  atkinson-hyperlegible-next,
+  texlivePackages,
 }: let
   runtimeDeps = [
     brightnessctl
@@ -22,7 +24,7 @@
   ];
 
   fontconfig = makeFontsConf {
-    fontDirectories = [nerd-fonts.jetbrains-mono];
+    fontDirectories = [nerd-fonts.jetbrains-mono atkinson-hyperlegible-next texlivePackages.alfaslabone];
   };
 in
   stdenvNoCC.mkDerivation {
@@ -50,7 +52,7 @@ in
 
     preFixup = ''
       qtWrapperArgs+=(
-        --prefix PATH : ${lib.makeBinPath runtimeDeps}
+        --prefix PATH:${lib.makeBinPath runtimeDeps}
         --set FONTCONFIG_FILE ${fontconfig}
         --add-flags "-p $out/share/sheez"
       )

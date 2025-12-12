@@ -3,6 +3,7 @@ import qs.commons
 import "modules"
 import "modules/bar"
 import "modules/logoutmenu"
+import "modules/lockscreen"
 
 Scope {
     ReloadPopup {}
@@ -10,6 +11,8 @@ Scope {
     Bar {}
 
     LogoutMenu {}
+
+    LockScreen {}
 
     IPCService {}
 }

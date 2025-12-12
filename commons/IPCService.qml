@@ -14,4 +14,14 @@ Item {
             PanelService.toggleLogoutMenu();
         }
     }
+
+    IpcHandler {
+        target: "lockScreen"
+
+        function toggle() {
+            Logger.debug("IPCService", "IPC Handler lockScreen toggle");
+
+            PanelService.toggleLockScreen();
+        }
+    }
 }

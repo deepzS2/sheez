@@ -32,7 +32,7 @@ Variants {
             icon: "󰌾",
             text: "Lock",
             key: Qt.Key_L,
-            command: "hyprlock"
+            command: () => PanelService.toggleLockScreen()
         },
         {
             icon: "󰤄",

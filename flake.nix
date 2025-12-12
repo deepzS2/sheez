@@ -24,8 +24,7 @@
       }: {
         packages.default = pkgs.callPackage ./package.nix {
           quickshell = inputs'.quickshell.packages.default;
-          inherit (pkgs) brightnessctl networkmanagerapplet pavucontrol blueman qt6 makeFontsConf;
-          nerd-fonts = pkgs.nerd-fonts;
+          inherit (pkgs) brightnessctl networkmanagerapplet pavucontrol blueman qt6 makeFontsConf nerd-fonts atkinson-hyperlegible-next texlivePackages;
         };
 
         devshells.default = {

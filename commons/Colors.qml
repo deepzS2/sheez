@@ -18,6 +18,7 @@ Singleton {
         // qmllint disable unresolved-type
         JsonAdapter {
             // Default colors (fallback if JSON file doesn't exist)
+            property string image: ""
             property string primary: "#9dcbfc"
             property string conPrimary: "#003355"
             property string primaryContainer: "#134a74"
@@ -71,6 +72,7 @@ Singleton {
     }
 
     // Expose animated colors to consumers
+    readonly property string imagePath: colorFile.adapter.image
     readonly property color primary: colorFile.adapter.primary
     readonly property color conPrimary: colorFile.adapter.conPrimary
     readonly property color primaryContainer: colorFile.adapter.primaryContainer
