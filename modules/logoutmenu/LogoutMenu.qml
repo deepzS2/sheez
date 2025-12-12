@@ -4,8 +4,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.commons
-// NOTE: I don't know why, but importing as "services" string makes qmllint go crazy
-import qs.modules.logoutmenu.services
 import "widgets"
 
 Variants {
@@ -53,7 +51,7 @@ Variants {
     signal keyPressed(int key)
 
     Component.onCompleted: {
-        LogoutMenuService.logoutMenuEl = this;
+        PanelService.logoutMenuEl = this;
     }
 
     model: Quickshell.screens

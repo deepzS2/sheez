@@ -1,6 +1,5 @@
 import QtQuick
 import qs.commons
-import qs.modules.logoutmenu.services
 import qs.widgets
 
 Rectangle {
@@ -35,7 +34,7 @@ Rectangle {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            LogoutMenuService.logoutMenuEl.isVisible = true;
+            PanelService.toggleLogoutMenu();
         }
     }
 
