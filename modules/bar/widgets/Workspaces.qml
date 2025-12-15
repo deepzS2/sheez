@@ -46,6 +46,8 @@ Rectangle {
             "code": "",
             "browser": "",
             "chat": "",
+            "stash": "",
+            "scratchpad": "",
             "default": ""
         })
 
