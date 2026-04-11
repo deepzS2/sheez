@@ -25,8 +25,12 @@ Rectangle {
     Text {
         id: powerText
         anchors.centerIn: parent
-        text: ""
-        font: Styles.systemFont
+        text: "⏻"
+        font {
+            family: Styles.systemFont.family
+            pixelSize: Styles.systemFont.pixelSize
+            bold: false
+        }
         color: Colors.conError
     }
 

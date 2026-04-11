@@ -69,7 +69,7 @@ Rectangle {
         }
 
         font {
-            family: "JetBrainsMono Nerd Font"
+            family: Styles.systemFont.family
             pointSize: 20
         }
     }

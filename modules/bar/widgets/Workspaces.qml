@@ -54,7 +54,7 @@ Rectangle {
     RowLayout {
         id: workspacesRow
         anchors.centerIn: parent
-        spacing: Styles.widgetSpacing
+        spacing: 6
 
         Repeater {
             model: root.workspaces

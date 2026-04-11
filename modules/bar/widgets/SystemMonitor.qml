@@ -70,7 +70,7 @@ Rectangle {
         const cpuText = `<font color="${cpuColor}"> ${cpuUsage.toFixed(0)}%</font>`;
         const memoryText = `<font color="${memoryColor}"> ${memoryUsage.toFixed(0)}%</font>`;
 
-        return `${cpuText} ${memoryText}`;
+        return `${cpuText} | ${memoryText}`;
     }
 
     function updateTooltipText() {

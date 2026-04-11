@@ -20,13 +20,13 @@
     networkmanagerapplet
     pavucontrol
     blueman
-    nerd-fonts.jetbrains-mono
+    nerd-fonts.iosevka
     atkinson-hyperlegible-next
     texlivePackages.alfaslabone
   ];
 
   fontconfig = makeFontsConf {
-    fontDirectories = [nerd-fonts.jetbrains-mono atkinson-hyperlegible-next texlivePackages.alfaslabone];
+    fontDirectories = [nerd-fonts.iosevka atkinson-hyperlegible-next texlivePackages.alfaslabone];
   };
 in
   stdenvNoCC.mkDerivation {

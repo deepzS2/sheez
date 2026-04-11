@@ -23,7 +23,7 @@ Rectangle {
         color: Colors.conSurface
 
         font {
-            family: "JetBrainsMono Nerd Font"
+            family: Styles.systemFont.family
             pointSize: 24
             bold: true
         }

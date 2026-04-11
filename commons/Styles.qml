@@ -5,12 +5,12 @@ import Quickshell
 Singleton {
     // Font settings
     readonly property font systemFont: ({
-            family: "JetBrainsMono Nerd Font",
+            family: "Iosevka Nerd Font Propo",
             pixelSize: 14,
             bold: true
         })
     readonly property font systemFontBig: ({
-            family: "JetBrainsMono Nerd Font",
+            family: "Iosevka Nerd Font Propo",
             pixelSize: 19,
             bold: true
         })

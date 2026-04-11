@@ -72,7 +72,6 @@ Item {
                 pixelSize: 300
                 family: "AlfaSlabOne"
                 weight: Font.ExtraBold
-                bold: true
             }
         }
 
@@ -101,8 +100,8 @@ Item {
 
             font {
                 pointSize: 75
-                family: "JetBrainsMono Nerd Font"
-                weight: Font.Bold
+                family: Styles.systemFont.family
+                bold: true
             }
         }
 
@@ -123,7 +122,7 @@ Item {
             font {
                 family: "Atkinson Hyperlegible Next"
                 pointSize: 12
-                weight: Font.Bold
+                bold: true
             }
 
             background: Rectangle {
