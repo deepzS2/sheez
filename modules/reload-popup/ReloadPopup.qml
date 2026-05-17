@@ -62,7 +62,7 @@ Scope {
 
             Rectangle {
                 id: rect
-                color: Qt.alpha(root.failed ? Colors.error : Colors.secondary, 0.4)
+                color: root.failed ? Colors.error : Colors.surface
 
                 implicitHeight: layout.implicitHeight + 50
                 implicitWidth: layout.implicitWidth + 30
@@ -84,11 +84,13 @@ Scope {
                     }
 
                     Text {
+                        font: Styles.systemFont
                         text: root.failed ? "Reload failed." : "Reloaded completed!"
                         color: root.failed ? Colors.conError : Colors.conSurfaceVariant
                     }
 
                     Text {
+                        font: Styles.systemFont
                         text: root.errorString
                         color: root.failed ? Colors.conError : Colors.conSurfaceVariant
                         // When visible is false, it also takes up no space.
@@ -109,7 +111,7 @@ Scope {
                         property: "width"
                         from: rect.width
                         to: 0
-                        duration: root.failed ? 10000 : 800
+                        duration: root.failed ? 10000 : 1600
                         onFinished: popupLoader.active = false
 
                         // Pause the animation when the mouse is hovering over the popup,

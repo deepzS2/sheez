@@ -7,7 +7,7 @@ BarWidget {
     id: root
 
     componentName: "AudioSource"
-    widgetColor: AudioService.sourceMuted ? Colors.tertiary : Colors.surface
+    widgetColor: AudioService.sourceMuted ? Colors.tertiary : Colors.surfaceContainerLow
     borderColor: AudioService.sourceMuted ? Colors.tertiary : Colors.outlineVariant
     tooltipText: AudioService.sourceTooltip
     implicitWidth: sourceText.implicitWidth + Styles.widgetPadding * 2

@@ -17,7 +17,7 @@ Scope {
             id: panel
             required property var modelData
             screen: modelData
-            color: "transparent"
+            color: Colors.background
             implicitHeight: Styles.barHeight
 
             anchors {

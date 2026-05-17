@@ -9,7 +9,7 @@ BarWidget {
     componentName: "Battery"
 
     // Conditional colors
-    widgetColor: root.isCharging ? Colors.secondary : Colors.surface
+    widgetColor: root.isCharging ? Colors.secondary : Colors.surfaceContainerLow
     borderColor: root.isCharging ? Colors.secondary : Colors.outlineVariant
     implicitWidth: batteryText.implicitWidth + Styles.widgetPadding * 2
 

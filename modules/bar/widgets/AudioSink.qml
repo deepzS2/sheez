@@ -7,7 +7,7 @@ BarWidget {
     id: root
 
     componentName: "AudioSink"
-    widgetColor: AudioService.sinkMuted ? Colors.tertiary : Colors.surface
+    widgetColor: AudioService.sinkMuted ? Colors.tertiary : Colors.surfaceContainerLow
     borderColor: AudioService.sinkMuted ? Colors.tertiary : Colors.outlineVariant
     tooltipText: AudioService.sinkTooltip
     implicitWidth: sinkText.implicitWidth + Styles.widgetPadding * 2

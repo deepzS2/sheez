@@ -6,8 +6,8 @@ BarWidget {
     id: root
 
     componentName: "Power"
-    widgetColor: Colors.error
-    borderColor: Colors.error
+    borderColor: Colors.outlineVariant
+    widgetColor: Colors.surfaceContainerLow
     implicitWidth: powerText.implicitWidth + Styles.widgetPadding * 2
 
     Text {
@@ -19,7 +19,7 @@ BarWidget {
             pixelSize: Styles.systemFont.pixelSize
             bold: false
         }
-        color: Colors.conError
+        color: Colors.error
     }
 
     MouseArea {

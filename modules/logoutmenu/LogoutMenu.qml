@@ -10,10 +10,10 @@ Variants {
     id: root
 
     property bool isVisible: false
-    property color backgroundColor: Qt.alpha(Colors.background, 0.75)
-    property color buttonColor: Qt.alpha(Colors.surfaceContainer, 0.8)
-    property color buttonHoverColor: Colors.primaryFixed
+    property color backgroundColor: Qt.alpha(Colors.background, 0.85)
+    property color buttonColor: Colors.surfaceContainerLow
     property color buttonTextColor: Colors.conSurface
+    property color buttonHoverColor: Colors.primaryFixed
     property color buttonHoverTextColor: Colors.conPrimaryFixed
     property var buttons: [
         {

@@ -5,7 +5,8 @@ import qs.modules.logoutmenu.services
 Rectangle {
     id: root
 
-    color: Qt.alpha(Colors.surfaceContainerLowest, 0.8)
+    color: Colors.surface
+    border.color: Colors.outline
     implicitWidth: uptimeText.implicitWidth + 120 * 2
     implicitHeight: uptimeText.implicitHeight + 15 * 2
 

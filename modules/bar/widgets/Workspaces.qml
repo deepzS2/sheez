@@ -10,6 +10,8 @@ BarWidget {
     id: root
 
     componentName: "Workspaces"
+    widgetColor: Colors.surfaceContainerLow
+    // borderColor: Colors.outline
     implicitWidth: workspacesRow.implicitWidth + Styles.widgetPadding * 2
 
     // Workspace data model

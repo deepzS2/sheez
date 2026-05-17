@@ -12,16 +12,17 @@ BarWidget {
     id: root
 
     componentName: "Window"
-    tooltipText: root.fullTitle
+    widgetColor: "transparent"
+    borderColor: "transparent"
     implicitWidth: windowLayout.implicitWidth + Styles.widgetPadding * 2
 
-    // Current window info
     property var currentWindow: null
     property string displayText: ""
     property string fullTitle: ""
     property color textColor: Colors.conSurface
     property string iconSource: ""
     property bool hasSystemIcon: false
+    property int maxTitleLength: 120
 
     Connections {
         target: CompositorService
@@ -75,7 +76,7 @@ BarWidget {
         const rawTitle = hasWindow ? windowInfo.title : "";
         const appId = hasWindow ? windowInfo.appId : "";
 
-        const processedTitle = processTitle(rawTitle);
+        const processedTitle = normalizeTitle(rawTitle);
         const iconResult = resolveIcon(appId, rawTitle);
 
         if (hasWindow) {
@@ -91,15 +92,14 @@ BarWidget {
         }
     }
 
-    function processTitle(rawTitle) {
+    function normalizeTitle(rawTitle) {
         if (!rawTitle)
             return "";
-        const len = rawTitle.length;
-        if (len > 40)
-            return rawTitle.substring(0, 37) + "...";
-        if (len < 5)
-            return rawTitle.padEnd(5, " ");
-        return rawTitle;
+
+        if (rawTitle.length < root.maxTitleLength)
+            return rawTitle;
+
+        return rawTitle.substring(0, root.maxTitleLength) + "...";
     }
 
     function resolveIcon(appId, rawTitle) {

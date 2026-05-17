@@ -7,7 +7,7 @@ BarWidget {
     id: root
 
     componentName: "Network"
-    widgetColor: NetworkingService.isConnected ? Colors.surface : Colors.tertiary
+    widgetColor: NetworkingService.isConnected ? Colors.surfaceContainerLow : Colors.tertiary
     borderColor: NetworkingService.isConnected ? Colors.outlineVariant : Colors.tertiary
     implicitWidth: networkText.implicitWidth + Styles.widgetPadding * 2
 
