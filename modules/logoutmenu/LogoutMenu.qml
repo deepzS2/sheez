@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import qs.commons
+import qs.shared
 import "widgets"
 
 Variants {

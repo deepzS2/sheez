@@ -1,27 +1,16 @@
 import QtQuick
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 import qs.modules.bar.services
 
-Rectangle {
+BarWidget {
     id: root
 
+    componentName: "AudioSource"
+    widgetColor: AudioService.sourceMuted ? Colors.tertiary : Colors.surface
+    borderColor: AudioService.sourceMuted ? Colors.tertiary : Colors.outlineVariant
+    tooltipText: AudioService.sourceTooltip
     implicitWidth: sourceText.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: AudioService.sourceMuted ? Colors.tertiary : Colors.surface
-    opacity: Styles.widgetOpacity
-
-    border {
-        width: Styles.widgetBorderWidth
-        color: AudioService.sourceMuted ? Colors.tertiary : Colors.outlineVariant
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: root
-    }
 
     Text {
         id: sourceText
@@ -32,14 +21,9 @@ Rectangle {
     }
 
     MouseArea {
-        id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onEntered: TooltipService.show(AudioService.sourceTooltip, root)
-        onExited: TooltipService.hide()
 
         onClicked: mouse => {
             if (mouse.button === Qt.LeftButton) {
@@ -53,10 +37,5 @@ Rectangle {
             const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
             AudioService.adjustSourceVolume(delta);
         }
-    }
-
-    // Initialize
-    Component.onCompleted: {
-        Logger.info("AudioSource", "Audio source widget initialized");
     }
 }

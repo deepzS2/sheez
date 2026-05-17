@@ -2,31 +2,26 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 import qs.modules.bar.services
 
-Rectangle {
+BarWidget {
     id: root
 
-    // Layout properties
+    componentName: "Workspaces"
     implicitWidth: workspacesRow.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: Colors.surface
-    opacity: Styles.widgetOpacity
 
-    // Border styling
-    border {
-        width: Styles.widgetBorderWidth
-        color: Colors.outlineVariant
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: root
-    }
+    // Workspace data model
+    property ListModel workspaces: ListModel {}
+    property var workspaceIcons: ({
+            "code": "",
+            "browser": "",
+            "chat": "",
+            "stash": "",
+            "scratchpad": "",
+            "default": ""
+        })
 
     Connections {
         target: CompositorService
@@ -39,17 +34,6 @@ Rectangle {
             Logger.errorf("Workspaces", `Compositor error: {0}\n{1}`, message, error);
         }
     }
-
-    // Workspace data model
-    property ListModel workspaces: ListModel {}
-    property var workspaceIcons: ({
-            "code": "",
-            "browser": "",
-            "chat": "",
-            "stash": "",
-            "scratchpad": "",
-            "default": ""
-        })
 
     RowLayout {
         id: workspacesRow
@@ -66,10 +50,8 @@ Rectangle {
 
                 width: workspaceText.implicitWidth + 4
                 height: Styles.widgetHeight
-                radius: 4
                 color: "transparent"
 
-                // Smooth transition
                 Behavior on color {
                     ColorAnimation {
                         duration: 300
@@ -84,7 +66,6 @@ Rectangle {
                     font: Styles.systemFont
                     color: workspaceButton.isActive ? Colors.conSurfaceVariant : Qt.rgba(Colors.conSurface.r, Colors.conSurface.g, Colors.conSurface.b, 0.3)
 
-                    // Smooth transition
                     Behavior on color {
                         ColorAnimation {
                             duration: 300
@@ -108,7 +89,6 @@ Rectangle {
                         }
                     }
                     onClicked: {
-                        Logger.infof("Workspaces", `Switching to workspace {0}`, workspaceButton.modelData.id);
                         CompositorService.switchToWorkspace(workspaceButton.modelData.id);
                     }
                 }
@@ -116,20 +96,15 @@ Rectangle {
         }
     }
 
-    // Component lifecycle
     Component.onCompleted: {
-        Logger.info("Workspaces", "Initializing workspace widget");
         CompositorService.activate();
     }
 
-    // Update workspaces model from service data
     function updateWorkspacesModel(serviceWorkspaces) {
         try {
             workspaces.clear();
-
             for (let i = 0; i < serviceWorkspaces.count; i++) {
-                const item = serviceWorkspaces.get(i);
-                workspaces.append(item);
+                workspaces.append(serviceWorkspaces.get(i));
             }
         } catch (e) {
             Logger.errorf("Workspaces", `Failed to update workspace model: {0}`, e);

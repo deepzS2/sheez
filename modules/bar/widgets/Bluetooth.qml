@@ -1,27 +1,14 @@
 import QtQuick
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 import qs.modules.bar.services
 
-Rectangle {
+BarWidget {
     id: root
 
+    componentName: "Bluetooth"
+    tooltipText: BluetoothService.tooltip
     implicitWidth: bluetoothText.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: Colors.surface
-    opacity: Styles.widgetOpacity
-
-    border {
-        width: Styles.widgetBorderWidth
-        color: Colors.outlineVariant
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: root
-    }
 
     Text {
         id: bluetoothText
@@ -35,16 +22,6 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-        onEntered: TooltipService.show(BluetoothService.tooltip, root)
-        onExited: TooltipService.hide()
-
         onClicked: BluetoothService.launchBluemanManager()
-    }
-
-    // Initialize
-    Component.onCompleted: {
-        Logger.info("Bluetooth", "Bluetooth widget initialized");
     }
 }

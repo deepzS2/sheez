@@ -3,7 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Fusion
 import QtQuick.Effects
-import qs.commons
+import qs.shared
 import qs.modules.lockscreen.services
 
 Item {
@@ -127,7 +127,6 @@ Item {
 
             background: Rectangle {
                 color: Qt.alpha(Colors.surfaceContainer, 0.5)
-                radius: 50
                 border.color: "transparent"
                 border.width: 2
             }

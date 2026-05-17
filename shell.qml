@@ -1,9 +1,9 @@
 import Quickshell
-import qs.commons
-import "modules"
 import "modules/bar"
 import "modules/logoutmenu"
 import "modules/lockscreen"
+import "modules/reload-popup"
+import "shared"
 
 Scope {
     ReloadPopup {}

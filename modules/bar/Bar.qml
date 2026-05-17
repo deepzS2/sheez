@@ -2,8 +2,8 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 import "widgets"
 
 Scope {

@@ -1,27 +1,13 @@
 import QtQuick
 import Quickshell
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 
-Rectangle {
-    id: distroWidget
+BarWidget {
+    id: root
 
+    componentName: "Distro"
     implicitWidth: distroText.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: Colors.surface
-    opacity: Styles.widgetOpacity
-
-    border {
-        width: Styles.widgetBorderWidth
-        color: Colors.outlineVariant
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: distroWidget
-    }
 
     Text {
         id: distroText

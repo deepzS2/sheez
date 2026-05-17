@@ -2,7 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import qs.commons
+import qs.shared
 
 Singleton {
     id: root

@@ -1,13 +1,11 @@
 import QtQuick
-import qs.commons
+import qs.shared
 import qs.modules.logoutmenu.services
 
 Rectangle {
     id: root
 
     color: Qt.alpha(Colors.surfaceContainerLowest, 0.8)
-    radius: 16
-
     implicitWidth: uptimeText.implicitWidth + 120 * 2
     implicitHeight: uptimeText.implicitHeight + 15 * 2
 

@@ -1,26 +1,24 @@
 import QtQuick
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 import qs.modules.bar.services
 
-Rectangle {
+BarWidget {
     id: root
 
+    componentName: "Network"
+    widgetColor: NetworkingService.isConnected ? Colors.surface : Colors.tertiary
+    borderColor: NetworkingService.isConnected ? Colors.outlineVariant : Colors.tertiary
     implicitWidth: networkText.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: NetworkingService.isConnected ? Colors.surface : Colors.tertiary
-    opacity: Styles.widgetOpacity
 
-    border {
-        width: Styles.widgetBorderWidth
-        color: NetworkingService.isConnected ? Colors.outlineVariant : Colors.tertiary
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: root
+    tooltipText: {
+        if (!NetworkingService.isConnected)
+            return "Disconnected";
+        if (NetworkingService.connectionType === "wifi")
+            return `${NetworkingService.essid} (${NetworkingService.signalStrength}%) \n${NetworkingService.ipAddress}`;
+        if (NetworkingService.connectionType === "ethernet")
+            return `${NetworkingService.interfaceName} 🖧\n${NetworkingService.ipAddress}`;
+        return NetworkingService.ipAddress;
     }
 
     Text {
@@ -35,14 +33,7 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-        onEntered: {
-            const tooltip = !NetworkingService.isConnected ? "Disconnected" : NetworkingService.connectionType === "wifi" ? `${NetworkingService.essid} (${NetworkingService.signalStrength}%)  \n${NetworkingService.ipAddress}` : NetworkingService.connectionType === "ethernet" ? `${NetworkingService.interfaceName} 🖧\n${NetworkingService.ipAddress}` : NetworkingService.ipAddress;
-            TooltipService.show(tooltip, root);
-        }
-        onExited: TooltipService.hide()
 
         onClicked: mouse => {
             if (mouse.button === Qt.LeftButton) {
@@ -51,10 +42,5 @@ Rectangle {
                 NetworkingService.launchNetworkManager();
             }
         }
-    }
-
-    // Initialize
-    Component.onCompleted: {
-        Logger.info("Network", "Network widget initialized");
     }
 }

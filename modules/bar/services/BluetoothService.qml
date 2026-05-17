@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
-import qs.commons
+import qs.shared
 
 Singleton {
     id: root

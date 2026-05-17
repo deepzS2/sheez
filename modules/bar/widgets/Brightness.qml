@@ -1,40 +1,24 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.commons
-import qs.widgets
+import qs.shared
+import qs.components
 
-Rectangle {
+BarWidget {
     id: root
 
-    // Layout properties
+    componentName: "Brightness"
+    tooltipText: root.tooltipText
     implicitWidth: brightnessText.implicitWidth + Styles.widgetPadding * 2
-    implicitHeight: Styles.capsuleHeight
-    radius: Styles.widgetRadius
-    color: Colors.surface
-    opacity: Styles.widgetOpacity
-
-    // Border styling
-    border {
-        width: Styles.widgetBorderWidth
-        color: Colors.outlineVariant
-    }
-
-    // Shadow effect
-    DropShadow {
-        anchors.fill: parent
-        source: root
-    }
 
     // Brightness properties
     property int currentBrightness: 0
     property int maxBrightness: 100
     property int targetBrightness: 0
-    property string text: ""
-    property string tooltipText: ""
+    property string displayText: ""
+    property string tipText: ""
     readonly property var icons: ["󱃓", "󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥", "󰖨"]
 
-    // File paths
     property string backlightDevice: ""
     readonly property string brightnessFilePath: backlightDevice ? `/sys/class/backlight/${backlightDevice}/brightness` : ""
     readonly property string maxBrightnessFilePath: backlightDevice ? `/sys/class/backlight/${backlightDevice}/max_brightness` : ""
@@ -42,7 +26,7 @@ Rectangle {
     Text {
         id: brightnessText
         anchors.centerIn: parent
-        text: root.text
+        text: root.displayText
         font: Styles.systemFont
         color: Colors.conSurface
     }
@@ -60,12 +44,9 @@ Rectangle {
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
-                const devices = this.text.trim().split('\n').filter(device => device.length > 0);
+                const devices = this.text.trim().split('\n').filter(d => d.length > 0);
                 if (devices.length > 0) {
                     root.backlightDevice = devices[0];
-                    Logger.infof("Brightness", "Detected backlight devices", devices);
-                } else {
-                    Logger.warn("Brightness", "No backlight devices found");
                 }
             }
         }
@@ -93,9 +74,6 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-        onEntered: TooltipService.show(root.tooltipText, root)
-        onExited: TooltipService.hide()
         onWheel: wheel => root.handleWheelEvent(wheel)
     }
 
@@ -103,44 +81,27 @@ Rectangle {
         brightnessFile.reload();
         root.currentBrightness = parseInt(brightnessFile.text().trim()) || 0;
         root.maxBrightness = parseInt(maxBrightnessFile.text().trim()) || 100;
-
-        Logger.debugf("Brightness", "Updated to {0}/{1}", root.currentBrightness, root.maxBrightness);
         updateDisplay(root.currentBrightness, root.maxBrightness);
     }
 
     function updateDisplay(current, max) {
         const percentage = Math.round((current / max) * 100);
         const iconIndex = Math.min(9, Math.floor(percentage / 10));
-
-        root.text = `${root.icons[iconIndex]} ${percentage}%`;
-        root.tooltipText = `Brightness: ${current}/${max} (${percentage}%)`;
+        root.displayText = `${root.icons[iconIndex]} ${percentage}%`;
+        root.tipText = `Brightness: ${current}/${max} (${percentage}%)`;
     }
 
     function handleWheelEvent(wheel) {
         const delta = wheel.angleDelta.y > 0 ? 1 : -1;
-        const brightness = root.targetBrightness || root.currentBrightness;
-
-        root.targetBrightness = brightness + delta;
-
-        Logger.debugf("Brightness", `Wheel Event - delta: ${delta}, target: ${root.targetBrightness}`);
-        Logger.table([
-            {
-                delta,
-                target: root.targetBrightness
-            }
-        ]);
+        root.targetBrightness = (root.targetBrightness || root.currentBrightness) + delta;
         applyBrightnessTimer.start();
     }
 
     function applyBrightnessChange() {
-        const clampedBrightness = Math.max(0, Math.min(root.maxBrightness, root.targetBrightness));
-        root.targetBrightness = clampedBrightness;
-
-        if (applyBrightnessTimer.running) {
+        const clamped = Math.max(0, Math.min(root.maxBrightness, root.targetBrightness));
+        root.targetBrightness = clamped;
+        if (applyBrightnessTimer.running)
             return;
-        }
-
-        Logger.infof("Brightness", `Applying brightness change to {0}`, clampedBrightness);
-        Quickshell.execDetached(["brightnessctl", "set", clampedBrightness.toString()]);
+        Quickshell.execDetached(["brightnessctl", "set", clamped.toString()]);
     }
 }

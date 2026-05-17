@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Wayland
-import qs.commons
+import qs.shared
 import qs.modules.lockscreen.services
 import qs.modules.lockscreen.widgets
 

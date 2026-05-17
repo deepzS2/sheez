@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell.Io
-import qs.commons
+import qs.shared
 
 Item {
     id: root

@@ -1,15 +1,13 @@
 import QtQuick
 import Quickshell.Io
 import QtQuick.Layouts
-import qs.commons
+import qs.shared
 
 Rectangle {
     id: root
 
     Layout.fillWidth: true
     Layout.fillHeight: true
-    radius: 32
-
     property color textColor: "white"
     required property string text
     required property string icon

@@ -1,14 +1,11 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import qs.commons
+import qs.shared
 
-// Reusable drawer component that expands from RTL or LTR
-// Shows only first child when collapsed, all children when expanded
 Item {
     id: root
 
-    // Default properties
     default property alias children: content.children
     property int direction: Qt.LeftToRight
     property bool expanded: false
@@ -18,7 +15,6 @@ Item {
     implicitHeight: Styles.capsuleHeight
     clip: true
 
-    // Content container with horizontal layout
     RowLayout {
         id: content
         layoutDirection: root.direction
@@ -26,7 +22,6 @@ Item {
         spacing: Styles.widgetSpacing
     }
 
-    // States for expansion
     states: [
         State {
             name: "expanded"
@@ -50,8 +45,6 @@ Item {
         }
     ]
 
-    // HoverHandler to toggle expansion
-    // MouseArea was not working properly for the children items
     HoverHandler {
         onHoveredChanged: root.expanded = hovered
     }

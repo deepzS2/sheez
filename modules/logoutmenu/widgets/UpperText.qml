@@ -1,5 +1,5 @@
 import QtQuick
-import qs.commons
+import qs.shared
 import qs.modules.logoutmenu.services
 
 Item {
