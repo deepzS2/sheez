@@ -8,10 +8,15 @@ BarWidget {
     id: root
 
     componentName: "Clock"
-    tooltipText: root.calText
+    tooltipText: {
+        const today = Qt.formatDateTime(clock.date, "ddd dd/MM/yy HH:mm");
+
+        return today + "\n\n" + root.calText;
+    }
     implicitWidth: clockText.implicitWidth + Styles.widgetPadding * 2
 
     property string calText: ""
+    property bool showDate: false
 
     SystemClock {
         id: clock
@@ -21,7 +26,7 @@ BarWidget {
     Text {
         id: clockText
         anchors.centerIn: parent
-        text: " " + Qt.formatTime(clock.date, "HH:mm")
+        text: showDate ? " " + Qt.formatDate(clock.date, "dddd, MMMM d") : " " + Qt.formatTime(clock.date, "HH:mm:ss")
         font: Styles.systemFont
         color: Colors.conSurface
     }
@@ -31,7 +36,9 @@ BarWidget {
         running: true
         command: ["sh", "-c", "cal"]
         stdout: StdioCollector {
-            onStreamFinished: root.calText = this.text
+            onStreamFinished: {
+                root.calText = this.text;
+            }
         }
     }
 
@@ -40,11 +47,7 @@ BarWidget {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         onClicked: {
-            if (clockText.text.includes(":")) {
-                clockText.text = " " + Qt.formatDate(new Date(), "dddd, MMMM d");
-            } else {
-                clockText.text = " " + Qt.formatTime(new Date(), "HH:mm");
-            }
+            root.showDate = !root.showDate;
         }
     }
 }
