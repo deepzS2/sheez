@@ -79,6 +79,7 @@ BarWidget {
 
     function updateBrightness() {
         brightnessFile.reload();
+
         root.currentBrightness = parseInt(brightnessFile.text().trim()) || 0;
         root.maxBrightness = parseInt(maxBrightnessFile.text().trim()) || 100;
         updateDisplay(root.currentBrightness, root.maxBrightness);
@@ -92,16 +93,18 @@ BarWidget {
     }
 
     function handleWheelEvent(wheel) {
-        const delta = wheel.angleDelta.y > 0 ? 1 : -1;
-        root.targetBrightness = (root.targetBrightness || root.currentBrightness) + delta;
+        if (wheel.angleDelta.y === 0)
+            return;
+
+        const percentage = 0.02;
+        const delta = wheel.angleDelta.y > 0 ? percentage : -percentage;
+        root.targetBrightness = root.currentBrightness + root.maxBrightness * delta;
         applyBrightnessTimer.start();
     }
 
     function applyBrightnessChange() {
         const clamped = Math.max(0, Math.min(root.maxBrightness, root.targetBrightness));
         root.targetBrightness = clamped;
-        if (applyBrightnessTimer.running)
-            return;
         Quickshell.execDetached(["brightnessctl", "set", clamped.toString()]);
     }
 }

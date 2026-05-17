@@ -12,6 +12,8 @@ BarWidget {
     tooltipText: AudioService.sinkTooltip
     implicitWidth: sinkText.implicitWidth + Styles.widgetPadding * 2
 
+    property real delta: 0
+
     Text {
         id: sinkText
         anchors.centerIn: parent
@@ -34,8 +36,19 @@ BarWidget {
         }
 
         onWheel: wheel => {
-            const delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
-            AudioService.adjustSinkVolume(delta);
+            if (wheel.angleDelta.y === 0)
+                return;
+
+            root.delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05;
+            adjustVolumeTimer.start();
+        }
+    }
+
+    Timer {
+        id: adjustVolumeTimer
+        interval: 200
+        onTriggered: () => {
+            AudioService.adjustSinkVolume(root.delta);
         }
     }
 }
