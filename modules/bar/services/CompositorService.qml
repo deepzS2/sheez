@@ -3,12 +3,12 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.shared
+import "compositors"
 
 Singleton {
     id: root
 
     signal workspacesUpdated(var workspaces)
-    signal workspaceActivated(var workspace)
     signal windowUpdated(var windowInfo)
     signal error(string message, var error)
 
@@ -18,14 +18,18 @@ Singleton {
 
     property var niriService: NiriService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
-        onWorkspaceActivated: workspace => root.workspaceActivated(workspace)
         onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
         onError: message => root.error(`NiriService: ${message}`)
     }
 
+    property var mangoService: MangoService {
+        onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
+        onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
+        onError: message => root.error(`MangoService: ${message}`)
+    }
+
     property var hyprlandService: HyprlandService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
-        onWorkspaceActivated: workspace => root.workspaceActivated(workspace)
         onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
         onError: (message, error) => root.error(`HyprlandService: ${message}`, error)
     }
@@ -45,6 +49,10 @@ Singleton {
         case "hyprland":
             Logger.info("CompositorService", "Using Hyprland service");
             activeService = hyprlandService;
+            break;
+        case "mango":
+            Logger.info("CompositorService", "Using Mango service");
+            activeService = mangoService;
             break;
         default:
             error(`Unsupported compositor: ${compositor}`);
@@ -101,6 +109,10 @@ Singleton {
             {
                 name: "hyprland",
                 service: hyprlandService
+            },
+            {
+                name: "mango",
+                service: mangoService
             }
         ];
 

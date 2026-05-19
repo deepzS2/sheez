@@ -10,13 +10,11 @@ Item {
 
     // Signals for workspace updates
     signal workspacesUpdated(var workspaces)
-    signal workspaceActivated(var workspace)
     signal windowUpdated(var windowInfo)
     signal error(string message)
 
     // Properties
     property bool active: false
-    property ListModel workspaces: ListModel {}
     property var _lastWorkspaceState: null
     property var currentWindow: null
     property var _lastWindowState: null
@@ -102,13 +100,12 @@ Item {
                 throw new Error("Invalid Niri Workspaces Output");
 
             const processedItems = processWorkspaceData(data);
-            updateWorkspacesModel(processedItems);
 
             if (!isWorkspacesEqual(processedItems, _lastWorkspaceState)) {
-                Logger.debugf("NiriService", "Workspaces updated ({0} workspaces)", workspaces.count);
+                Logger.debugf("NiriService", "Workspaces updated ({0} workspaces)", processedItems.length);
                 Logger.table(processedItems);
                 _lastWorkspaceState = processedItems;
-                workspacesUpdated(workspaces);
+                workspacesUpdated(processedItems);
             }
         } catch (e) {
             error(`Failed to parse workspace data`, e);
@@ -126,11 +123,6 @@ Item {
                     isUrgent: item.is_urgent ?? false,
                     isOccupied: !Number.isNaN(item.is_occupied)
                 }));
-    }
-
-    function updateWorkspacesModel(processedItems) {
-        workspaces.clear();
-        processedItems.forEach(item => workspaces.append(item));
     }
 
     function parseWindows(output) {
@@ -210,8 +202,8 @@ Item {
 
     function detect() {
         // Check for Niri-specific environment variables
-        if (Quickshell.env("NIRI_SOCKET") !== undefined) {
-            Logger.debug("NiriService", "Detected Niri via NIRI_SOCKET environment variable");
+        if (Quickshell.env("NIRI_SOCKET")) {
+            Logger.debugf("NiriService", "Detected Niri via NIRI_SOCKET environment variable");
             return true;
         }
 

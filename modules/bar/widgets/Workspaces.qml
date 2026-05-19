@@ -105,9 +105,7 @@ BarWidget {
     function updateWorkspacesModel(serviceWorkspaces) {
         try {
             workspaces.clear();
-            for (let i = 0; i < serviceWorkspaces.count; i++) {
-                workspaces.append(serviceWorkspaces.get(i));
-            }
+            serviceWorkspaces.forEach(workspace => workspaces.append(workspace));
         } catch (e) {
             Logger.errorf("Workspaces", `Failed to update workspace model: {0}`, e);
         }

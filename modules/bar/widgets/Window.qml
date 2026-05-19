@@ -77,7 +77,7 @@ BarWidget {
         const appId = hasWindow ? windowInfo.appId : "";
 
         const processedTitle = normalizeTitle(rawTitle);
-        const iconResult = resolveIcon(appId, rawTitle);
+        const iconResult = resolveIcon(appId);
 
         if (hasWindow) {
             root.fullTitle = rawTitle;
@@ -102,7 +102,7 @@ BarWidget {
         return rawTitle.substring(0, root.maxTitleLength) + "...";
     }
 
-    function resolveIcon(appId, rawTitle) {
+    function resolveIcon(appId) {
         const entry = DesktopEntries.byId(appId) || DesktopEntries.heuristicLookup(appId);
         if (entry && entry.icon) {
             const iconPath = Quickshell.iconPath(entry.icon);
@@ -114,6 +114,7 @@ BarWidget {
                 };
             }
         }
+
         return {
             iconSource: "",
             hasSystemIcon: false,

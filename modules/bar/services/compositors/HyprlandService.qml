@@ -10,16 +10,13 @@ Item {
 
     // Signals for workspace updates
     signal workspacesUpdated(var workspaces)
-    signal workspaceActivated(var workspace)
     signal windowUpdated(var windowInfo)
     signal error(string message, var error)
 
     // Properties
     property bool active: false
-    property ListModel workspaces: ListModel {}
     property string hyprlandSocket: getHyprlandSocket()
     property var _lastWorkspaceState: null
-    property var currentWindow: null
     property var _lastWindowState: null
 
     // Hyprland IPC socket watcher
@@ -132,7 +129,6 @@ Item {
                 throw new Error("Invalid Hyprland Workspaces Output");
 
             const processedItems = processWorkspaceData(data);
-            updateWorkspacesModel(processedItems);
 
             const currentState = processedItems.map(ws => ({
                         id: ws.id,
@@ -142,10 +138,10 @@ Item {
                     }));
 
             if (!isWorkspacesEqual(currentState, _lastWorkspaceState)) {
-                Logger.debugf("HyprlandService", "Workspaces updated ({0} workspaces)", workspaces.count);
-                Logger.table(processedItems);
+                Logger.debugf("HyprlandService", "Workspaces updated ({0} workspaces)", currentState.length);
+                Logger.table(currentState);
                 _lastWorkspaceState = currentState;
-                workspacesUpdated(workspaces);
+                workspacesUpdated(currentState);
             }
         } catch (e) {
             error(`Failed to parse workspace data`, e);
@@ -166,11 +162,6 @@ Item {
                     isUrgent: item.urgent || false,
                     isOccupied: item.windows > 0
                 }));
-    }
-
-    function updateWorkspacesModel(processedItems) {
-        workspaces.clear();
-        processedItems.forEach(item => workspaces.append(item));
     }
 
     function isWorkspacesEqual(workspacesA, workspacesB) {
@@ -194,7 +185,6 @@ Item {
             if (!isWindowsEqual(windowInfo, _lastWindowState)) {
                 Logger.debugf("HyprlandService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
                 _lastWindowState = windowInfo;
-                currentWindow = windowInfo;
                 windowUpdated(windowInfo);
             }
         } catch (e) {
@@ -241,22 +231,21 @@ Item {
     }
 
     function updateWorkspaceActiveStatus(activeId) {
-        for (let i = 0; i < workspaces.count; i++) {
-            const workspace = workspaces.get(i);
+        _lastWorkspaceState = _lastWorkspaceState.map(workspace => {
             const isActive = workspace.id === activeId;
             const isFocused = workspace.id === activeId;
 
-            workspaces.set(i, {
+            return {
                 id: workspace.id,
                 idx: workspace.idx,
                 name: workspace.name,
                 output: workspace.output,
-                isFocused: isFocused,
-                isActive: isActive,
+                isFocused,
+                isActive,
                 isUrgent: workspace.isUrgent,
                 isOccupied: workspace.isOccupied
-            });
-        }
+            };
+        });
     }
 
     function parseHyprlandEvents(output) {
@@ -289,7 +278,7 @@ Item {
 
     function detect() {
         // Check for Hyprland-specific environment variables
-        if (Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") !== undefined) {
+        if (Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE")) {
             Logger.debug("HyprlandService", "Detected Hyprland via HYPRLAND_INSTANCE_SIGNATURE environment variable");
             return true;
         }
