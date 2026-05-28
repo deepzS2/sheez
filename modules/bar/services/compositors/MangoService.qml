@@ -18,18 +18,34 @@ Item {
     property var _lastTagsState: null
     property var _lastClientState: null
 
-    // Mango IPC socket watcher
+    // Mango IPC focused client
     Process {
-        id: mangoValuesProcess
+        id: mangoFocusedClientProcess
         running: root.active
-        command: ["mmsg", "-w", "-t", "-c"] // Tags and focused client
+        command: ["mmsg", "watch", "focusing-client"]
         onRunningChanged: if (!running && root.active)
             running = true
         stdout: SplitParser {
-            splitMarker: ""
+            splitMarker: "\n"
 
             onRead: data => {
-                root.parseMangoValues(data);
+                root.parseMangoFocusedClient(data);
+            }
+        }
+    }
+
+    // Mango IPC tags
+    Process {
+        id: mangoTagsProcess
+        running: root.active
+        command: ["mmsg", "watch", "all-tags"]
+        onRunningChanged: if (!running && root.active)
+            running = true
+        stdout: SplitParser {
+            splitMarker: "\n"
+
+            onRead: data => {
+                root.parseMangoTags(data);
             }
         }
     }
@@ -37,7 +53,6 @@ Item {
     function activate() {
         Logger.info("MangoService", "Activating Mango service");
         active = true;
-        mangoValuesProcess.running = true;
     }
 
     function deactivate() {
@@ -54,43 +69,21 @@ Item {
     function refreshWorkspaces() {
     }
 
-    function parseMangoValues(output) {
+    function parseMangoTags(output) {
         try {
             if (!output)
                 return;
 
-            const lines = output.split("\n");
-            const activeClient = lines.filter(line => line.includes("appid") || line.includes("title")).reduce((acc, line) => {
-                const [_, key, ...value] = line.split(" ");
+            const {
+                all_tags: allTags
+            } = JSON.parse(output);
 
-                const normalizedKey = key === 'appid' ? 'appId' : key;
-
-                return Object.assign({
-                    [normalizedKey]: value.join(" ")
-                }, acc);
-            }, {});
-
-            const tags = lines.filter(line => line.search(/tag\s/) !== -1).reduce((acc, line) => {
-                const [, , tagId, state] = line.split(" ");
-
-                if (acc.find(tag => tag.id === tagId)) {
-                    return acc;
-                }
-
-                return acc.concat([
-                    {
-                        id: tagId,
-                        isActive: state === "1",
-                        isUrgent: state === "2"
-                    }
-                ]);
-            }, []);
-
-            if (!isClientsEqual(activeClient, _lastClientState)) {
-                Logger.debugf("MangoService", "Client updated: {0} ({1})", activeClient.title, activeClient.appId);
-                _lastClientState = activeClient;
-                windowUpdated(activeClient);
-            }
+            // no flatmap?
+            const tags = allTags.reduce((tags, monitorTags) => tags.concat(monitorTags.tags), []).map(tag => ({
+                        id: tag.index,
+                        isActive: tag["is_active"],
+                        isUrgent: tag["is_urgent"]
+                    }));
 
             if (!isTagsEqual(tags, _lastTagsState)) {
                 Logger.debugf("MangoService", "Workspaces updated ({0} workspaces)", _lastTagsState?.length);
@@ -99,7 +92,29 @@ Item {
                 workspacesUpdated(tags);
             }
         } catch (e) {
-            error(`Error parsing values`, e);
+            error(`Error parsing tags`, e);
+        }
+    }
+
+    function parseMangoFocusedClient(output) {
+        try {
+            if (!output)
+                return;
+
+            const data = JSON.parse(output);
+
+            const activeClient = {
+                appId: data.appid,
+                title: data.title
+            };
+
+            if (!isClientsEqual(activeClient, _lastClientState)) {
+                Logger.debugf("MangoService", "Client updated: {0} ({1})", activeClient.title, activeClient.appId);
+                _lastClientState = activeClient;
+                windowUpdated(activeClient);
+            }
+        } catch (e) {
+            error(`Error parsing focused client`, e);
         }
     }
 
