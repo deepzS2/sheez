@@ -12,12 +12,14 @@ Sheez is a minimal, extensible desktop bar built with [Quickshell](https://git.o
 - **Dynamic theming**: Automatic color generation from wallpapers using [matugen](https://github.com/InioX/matugen)
 - **Logout Menu**: Power management interface providing shutdown, reboot, lock, suspend, and logout options with keyboard shortcuts
 - **Lockscreen**: Secure session locking with Wayland protocol support
+- **Notification Center**: Real-time notifications with toast popups and history management
 
 ## Screenshots
 
 ![Bar preview](./docs/bar.png)
 ![Logout Menu preview](./docs/logout-menu.png)
 ![Lockscreen preview](./docs/lockscreen.png)
+![Notifications preview](./docs/notifications.png)
 
 ## Installation
 
@@ -82,12 +84,14 @@ Sheez supports inter-process communication (IPC) for controlling various compone
 
 - `logout toggle`: Toggle the logout menu
 - `lockScreen toggle`: Toggle the lockscreen
+- `notifications toggle`: Toggle the notification center
 
 You can send IPC commands using quickshell's IPC interface:
 
 ```bash
 sheez ipc call logout toggle
 sheez ipc call lockScreen toggle
+sheez ipc call notifications toggle
 ```
 
 ## Contributing
