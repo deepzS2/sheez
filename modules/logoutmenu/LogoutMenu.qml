@@ -44,7 +44,7 @@ Variants {
             icon: "󰍃",
             text: "Logout",
             key: Qt.Key_Q,
-            command: "loginctl terminate-user $USER"
+            command: "loginctl terminate-session $XDG_SESSION_ID"
         }
     ]
 
