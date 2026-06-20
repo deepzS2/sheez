@@ -22,6 +22,8 @@ Singleton {
     readonly property int widgetSpacing: 4
     readonly property int widgetPadding: 12
     readonly property int marginSize: 8
+    readonly property int notificationCenterWidth: 380
+    readonly property int notificationCenterHeight: 440
 
     // Update intervals (milliseconds)
     readonly property int clockInterval: 1000
@@ -32,5 +34,4 @@ Singleton {
     // Widget styling
     readonly property real widgetOpacity: 0.95
     readonly property int widgetBorderWidth: 1
-
 }

@@ -15,7 +15,7 @@ BarWidget {
     implicitWidth: workspacesRow.implicitWidth + Styles.widgetPadding * 2
 
     // Workspace data model
-    property ListModel workspaces: ListModel {}
+    property list<var> workspaces: []
     property var workspaceIcons: ({
             "code": "",
             "browser": "",
@@ -98,16 +98,16 @@ BarWidget {
         }
     }
 
-    Component.onCompleted: {
-        CompositorService.activate();
-    }
-
     function updateWorkspacesModel(serviceWorkspaces) {
         try {
-            workspaces.clear();
-            serviceWorkspaces.forEach(workspace => workspaces.append(workspace));
+            workspaces = [];
+            serviceWorkspaces.forEach(workspace => workspaces.push(workspace));
         } catch (e) {
             Logger.errorf("Workspaces", `Failed to update workspace model: {0}`, e);
         }
+    }
+
+    Component.onCompleted: {
+        CompositorService.activate();
     }
 }

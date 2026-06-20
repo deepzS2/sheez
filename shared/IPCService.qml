@@ -24,4 +24,14 @@ Item {
             PanelService.toggleLockScreen();
         }
     }
+
+    IpcHandler {
+        target: "notifications"
+
+        function toggle(): void {
+            Logger.debug("IPCService", "IPC Handler notifications toggle");
+
+            PanelService.toggleNotificationPanel();
+        }
+    }
 }

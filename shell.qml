@@ -3,9 +3,12 @@ import "modules/bar"
 import "modules/logoutmenu"
 import "modules/lockscreen"
 import "modules/reload-popup"
+import "modules/notifications"
 import "shared"
 
-Scope {
+ShellRoot {
+    settings.watchFiles: true
+
     ReloadPopup {}
 
     Bar {}
@@ -15,4 +18,6 @@ Scope {
     LockScreen {}
 
     IPCService {}
+
+    NotificationCenter {}
 }
