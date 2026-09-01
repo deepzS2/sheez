@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "dedupe.js" as Dedupe
+import "hyprland.js" as HyprlandParser
 import qs.shared
 
 Item {
@@ -11,7 +13,7 @@ Item {
     // Signals for workspace updates
     signal workspacesUpdated(var workspaces)
     signal windowUpdated(var windowInfo)
-    signal error(string message, var error)
+    signal error(string message)
 
     // Properties
     property bool active: false
@@ -124,155 +126,60 @@ Item {
 
     function parseWorkspaces(output) {
         try {
-            const data = JSON.parse(output);
-            if (!Array.isArray(data))
-                throw new Error("Invalid Hyprland Workspaces Output");
+            const workspaces = HyprlandParser.parseWorkspaces(output);
 
-            const processedItems = processWorkspaceData(data);
-
-            const currentState = processedItems.map(ws => ({
-                        id: ws.id,
-                        name: ws.name,
-                        isActive: ws.isActive,
-                        isOccupied: ws.isOccupied
-                    }));
-
-            if (!isWorkspacesEqual(currentState, _lastWorkspaceState)) {
-                Logger.debugf("HyprlandService", "Workspaces updated ({0} workspaces)", currentState.length);
-                Logger.table(currentState);
-                _lastWorkspaceState = currentState;
-                workspacesUpdated(currentState);
+            if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
+                Logger.debugf("HyprlandService", "Workspaces updated ({0} workspaces)", workspaces.length);
+                _lastWorkspaceState = workspaces;
+                workspacesUpdated(workspaces);
             }
         } catch (e) {
-            error(`Failed to parse workspace data`, e);
+            error(`Failed to parse workspace data: ${e}`);
         }
-    }
-
-    function processWorkspaceData(data) {
-        return data.sort((a, b) => a.id - b.id).map(item => ({
-                    id: item.id,
-                    // Hyprland uses id as index
-                    idx: item.id,
-                    name: item.name || "",
-                    output: item.monitor || "",
-                    // Will be updated by active workspace query
-                    isFocused: false,
-                    // Will be updated by active workspace query
-                    isActive: false,
-                    isUrgent: item.urgent || false,
-                    isOccupied: item.windows > 0
-                }));
-    }
-
-    function isWorkspacesEqual(workspacesA, workspacesB) {
-        if (!workspacesA || !workspacesB || workspacesA.length !== workspacesB.length)
-            return false;
-
-        return workspacesA.every((ws1, index) => {
-            const ws2 = workspacesB[index];
-            return ws1.id === ws2.id && ws1.name === ws2.name && ws1.isActive === ws2.isActive && ws1.isOccupied === ws2.isOccupied;
-        });
     }
 
     function parseClients(output) {
         try {
-            const data = JSON.parse(output);
-            if (!Array.isArray(data))
-                throw new Error("Invalid Hyprland Clients Output");
+            const windowInfo = HyprlandParser.parseFocusedWindow(output);
 
-            const windowInfo = processClientData(data);
-
-            if (!isWindowsEqual(windowInfo, _lastWindowState)) {
+            if (!Dedupe.windowsEqual(windowInfo, _lastWindowState)) {
                 Logger.debugf("HyprlandService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
                 _lastWindowState = windowInfo;
                 windowUpdated(windowInfo);
             }
         } catch (e) {
-            error(`Failed to parse client data`, e);
+            error(`Failed to parse client data: ${e}`);
         }
-    }
-
-    function processClientData(data) {
-        const focusedWindow = data.find(client => client.focused === true);
-
-        return focusedWindow ? {
-            title: focusedWindow.title || "",
-            // Hyprland uses 'class' instead of 'app_id'
-            appId: focusedWindow.class || "",
-            isFocused: true
-        } : {
-            title: "",
-            appId: "",
-            isFocused: false
-        };
-    }
-
-    function isWindowsEqual(windowA, windowB) {
-        if (!windowA && !windowB)
-            return true;
-        if (!windowA || !windowB)
-            return false;
-
-        return windowA.title === windowB.title && windowA.appId === windowB.appId && windowA.isFocused === windowB.isFocused;
     }
 
     function parseActiveWorkspace(output) {
         try {
-            const data = JSON.parse(output);
+            const activeId = HyprlandParser.parseActiveWorkspaceId(output);
 
-            if (!data || typeof data.id === 'undefined')
-                throw new Error("Invalid Hyprland Active Workspace Output");
+            // Active-workspace events can arrive before the first workspaces query
+            if (_lastWorkspaceState) {
+                const workspaces = HyprlandParser.markActiveWorkspace(_lastWorkspaceState, activeId);
+                if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
+                    _lastWorkspaceState = workspaces;
+                    workspacesUpdated(workspaces);
+                }
+            }
 
-            updateWorkspaceActiveStatus(data.id);
-            Logger.debugf("HyprlandService", "Active workspace updated: {0}", data.id);
+            Logger.debugf("HyprlandService", "Active workspace updated: {0}", activeId);
         } catch (e) {
-            error(`Failed to parse active workspace data`, e);
+            error(`Failed to parse active workspace data: ${e}`);
         }
-    }
-
-    function updateWorkspaceActiveStatus(activeId) {
-        _lastWorkspaceState = _lastWorkspaceState.map(workspace => {
-            const isActive = workspace.id === activeId;
-            const isFocused = workspace.id === activeId;
-
-            return {
-                id: workspace.id,
-                idx: workspace.idx,
-                name: workspace.name,
-                output: workspace.output,
-                isFocused,
-                isActive,
-                isUrgent: workspace.isUrgent,
-                isOccupied: workspace.isOccupied
-            };
-        });
     }
 
     function parseHyprlandEvents(output) {
         try {
-            const lines = output.split('\n').filter(line => line.trim());
-            processEvents(lines);
-        } catch (e) {
-            error(`Error parsing event`, e);
-        }
-    }
-
-    function processEvents(lines) {
-        const workspaceEvents = ['workspace', 'focusedmon', 'createworkspace', 'destroyworkspace'];
-        const windowEvents = ['activewindow', 'closewindow', 'openwindow', 'movewindow'];
-
-        for (const line of lines) {
-            if (!line.includes('>>'))
-                continue;
-
-            const [eventType, eventData] = line.split('>>', 2);
-            Logger.debugf("HyprlandService", `Event received: {0}`, eventType);
-
-            if (workspaceEvents.includes(eventType)) {
+            const targets = HyprlandParser.parseEventTargets(output);
+            if (targets.workspaces)
                 refreshWorkspaces();
-            } else if (windowEvents.includes(eventType)) {
+            if (targets.windows)
                 refreshClients();
-            }
+        } catch (e) {
+            error(`Error parsing event: ${e}`);
         }
     }
 

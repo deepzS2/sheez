@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "dedupe.js" as Dedupe
+import "niri.js" as NiriParser
 import qs.shared
 
 Item {
@@ -95,83 +97,31 @@ Item {
     // Internal functions
     function parseWorkspaces(output) {
         try {
-            const data = JSON.parse(output);
-            if (!Array.isArray(data))
-                throw new Error("Invalid Niri Workspaces Output");
+            const workspaces = NiriParser.parseWorkspaces(output);
 
-            const processedItems = processWorkspaceData(data);
-
-            if (!isWorkspacesEqual(processedItems, _lastWorkspaceState)) {
-                Logger.debugf("NiriService", "Workspaces updated ({0} workspaces)", processedItems.length);
-                Logger.table(processedItems);
-                _lastWorkspaceState = processedItems;
-                workspacesUpdated(processedItems);
+            if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
+                Logger.debugf("NiriService", "Workspaces updated ({0} workspaces)", workspaces.length);
+                _lastWorkspaceState = workspaces;
+                workspacesUpdated(workspaces);
             }
         } catch (e) {
-            error(`Failed to parse workspace data`, e);
+            error(`Failed to parse workspace data: ${e}`);
         }
-    }
-
-    function processWorkspaceData(data) {
-        return data.sort((a, b) => a.idx - b.idx).map(item => ({
-                    id: item.id,
-                    idx: item.idx,
-                    name: item.name ?? "",
-                    output: item.output ?? "",
-                    isFocused: item.is_focused ?? false,
-                    isActive: item.is_active ?? false,
-                    isUrgent: item.is_urgent ?? false,
-                    isOccupied: !Number.isNaN(item.is_occupied)
-                }));
     }
 
     function parseWindows(output) {
         try {
-            const data = JSON.parse(output);
+            const windowInfo = NiriParser.parseFocusedWindow(output);
 
-            if (!Array.isArray(data))
-                throw new Error("Invalid Niri Windows Output");
-
-            const windowInfo = processWindowData(data);
-
-            if (!isWindowsEqual(windowInfo, _lastWindowState)) {
+            if (!Dedupe.windowsEqual(windowInfo, _lastWindowState)) {
                 Logger.debugf("NiriService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
                 _lastWindowState = windowInfo;
                 currentWindow = windowInfo;
                 windowUpdated(windowInfo);
             }
         } catch (e) {
-            error(`Failed to parse window data`, e);
+            error(`Failed to parse window data: ${e}`);
         }
-    }
-
-    function processWindowData(data) {
-        const focusedWindow = data.find(window => window.is_focused);
-
-        return {
-            title: focusedWindow?.title || "",
-            appId: focusedWindow?.app_id || "",
-            isFocused: !!focusedWindow
-        };
-    }
-
-    function isWindowsEqual(windowA, windowB) {
-        if (!windowA && !windowB)
-            return true;
-        if (!windowA || !windowB)
-            return false;
-
-        return windowA.title === windowB.title && windowA.appId === windowB.appId && windowA.isFocused === windowB.isFocused;
-    }
-
-    function isWorkspacesEqual(workspacesA, workspacesB) {
-        if (!workspacesA || !workspacesB || workspacesA.length !== workspacesB.length)
-            return false;
-
-        return workspacesA.every((ws1, index) => {
-            const ws2 = workspacesB[index];
-            return ws1.id === ws2.id && ws1.name === ws2.name && ws1.isActive === ws2.isActive && ws1.isOccupied === ws2.isOccupied;
-        });
     }
 
     function parseNiriEvents(output) {
@@ -179,24 +129,16 @@ Item {
             if (!output)
                 return;
 
-            const data = JSON.parse(output);
-            const eventName = Object.keys(data)?.[0];
+            const eventName = NiriParser.parseEventName(output);
             Logger.debugf("NiriService", "Event received: {0}", eventName);
 
-            processEvent(eventName);
+            const targets = NiriParser.eventTargets(eventName);
+            if (targets.workspaces)
+                niriWorkspacesProcess.running = true;
+            if (targets.windows)
+                niriWindowsProcess.running = true;
         } catch (e) {
-            error(`Error parsing event`, e);
-        }
-    }
-
-    function processEvent(eventName) {
-        const workspaceEvents = ["WorkspacesChanged", "WorkspaceActivated"];
-        const windowEvents = ["WindowOpenedOrChanged", "WindowClosed", "WindowFocusChanged"];
-
-        if (workspaceEvents.includes(eventName)) {
-            niriWorkspacesProcess.running = true;
-        } else if (windowEvents.includes(eventName)) {
-            niriWindowsProcess.running = true;
+            error(`Error parsing event: ${e}`);
         }
     }
 

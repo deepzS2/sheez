@@ -31,8 +31,8 @@ BarWidget {
             root.updateWindow(windowInfo);
         }
 
-        function onError(message, error) {
-            Logger.errorf("Window", `CompositorService error: {0}\n{1}`, message, error);
+        function onError(message) {
+            Logger.errorf("Window", `CompositorService error: {0}`, message);
         }
     }
 
@@ -59,14 +59,6 @@ BarWidget {
             maximumLineCount: 1
             Layout.alignment: Qt.AlignBottom
         }
-    }
-
-    Component.onCompleted: {
-        CompositorService.activate();
-    }
-
-    Component.onDestruction: {
-        CompositorService.deactivate();
     }
 
     function updateWindow(windowInfo) {

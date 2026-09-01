@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "networking.js" as NetworkParser
 import qs.shared
 
 Singleton {
@@ -14,9 +15,9 @@ Singleton {
     readonly property string ipAddress: networkInfo.ipAddress
     readonly property string essid: networkInfo.essid
     readonly property int signalStrength: networkInfo.signalStrength
-    readonly property string bandwidthTotalBytes: formatBandwidth(bandwidthStats.downSpeed + bandwidthStats.upSpeed)
-    readonly property string bandwidthDownBits: formatBandwidthBits(bandwidthStats.downSpeed * 8)
-    readonly property string bandwidthUpBits: formatBandwidthBits(bandwidthStats.upSpeed * 8)
+    readonly property string bandwidthTotalBytes: NetworkParser.formatBandwidth(bandwidthStats.downSpeed + bandwidthStats.upSpeed)
+    readonly property string bandwidthDownBits: NetworkParser.formatBandwidthBits(bandwidthStats.downSpeed * 8)
+    readonly property string bandwidthUpBits: NetworkParser.formatBandwidthBits(bandwidthStats.upSpeed * 8)
     readonly property bool isConnected: networkInfo.isConnected
 
     // Icons based on connection type
@@ -75,7 +76,7 @@ Singleton {
         command: ["nmcli", "-t", "-f", "TYPE,STATE,CONNECTION,DEVICE", "device", "status"]
         stdout: StdioCollector {
             onStreamFinished: {
-                const bestConnection = root.parseNetworkInfo(this.text);
+                const bestConnection = NetworkParser.parseNetworkInfo(this.text);
                 if (bestConnection) {
                     root.currentConnection = bestConnection;
                     root.startNetworkDetailUpdate();
@@ -93,7 +94,7 @@ Singleton {
         command: []
         stdout: StdioCollector {
             onStreamFinished: {
-                const details = root.parseDeviceDetails(this.text);
+                const details = NetworkParser.parseDeviceDetails(this.text, root.currentConnection.type);
                 root.updateNetworkDetails(details);
             }
         }
@@ -106,7 +107,7 @@ Singleton {
         command: []
         stdout: StdioCollector {
             onStreamFinished: {
-                const signalStrength = root.parseWiFiList(this.text);
+                const signalStrength = NetworkParser.parseWiFiList(this.text, root.networkInfo.essid);
                 root.updateSignalStrength(signalStrength);
             }
         }
@@ -118,39 +119,11 @@ Singleton {
         path: "/proc/net/dev"
         blockWrites: true
         onLoaded: {
-            const stats = root.parseBandwidth(text());
+            const stats = NetworkParser.parseBandwidth(text(), root.interfaceName);
             if (stats) {
                 root.updateBandwidth(stats);
             }
         }
-    }
-
-    function parseNetworkInfo(output) {
-        const lines = output.trim().split('\n').filter(line => line.trim());
-        let bestConnection = null;
-
-        lines.forEach(line => {
-            const parts = line.split(':');
-            if (parts.length < 4)
-                return;
-
-            const [typeRaw, state, connection, device] = parts;
-            const type = typeRaw.toLowerCase();
-
-            if (state !== "connected")
-                return;
-
-            // Prefer ethernet over wifi
-            if (type === "ethernet" || (type === "wifi" && !bestConnection)) {
-                bestConnection = {
-                    type,
-                    connection,
-                    device
-                };
-            }
-        });
-
-        return bestConnection;
     }
 
     function updateNetworkDisconnected() {
@@ -214,98 +187,6 @@ Singleton {
 
         deviceDetailsProcess.command = ["nmcli", "-t", "-f", "all", "device", "show", root.currentConnection.device];
         deviceDetailsProcess.running = true;
-    }
-
-    function parseDeviceDetails(output) {
-        const lines = output.trim().split('\n');
-        let ipAddress = "";
-        let essid = "";
-
-        lines.forEach(line => {
-            const parts = line.split(':');
-            if (parts.length < 2)
-                return;
-
-            const key = parts[0];
-            const value = parts.slice(1).join(':');
-
-            if (key === 'IP4.ADDRESS[1]') {
-                ipAddress = value.split('/')[0];
-            } else if (key === 'GENERAL.CONNECTION' && root.currentConnection.type === "wifi") {
-                essid = value;
-            }
-        });
-
-        return {
-            ipAddress,
-            essid
-        };
-    }
-
-    function parseWiFiList(output) {
-        const lines = output.trim().split('\n');
-        const targetEssid = root.networkInfo.essid;
-
-        const signalStrength = lines.reduce((found, line) => {
-            if (found > 0)
-                return found;
-
-            const parts = line.split(':');
-            if (parts.length >= 2) {
-                const [ssid, signalStr] = parts;
-                const signal = parseInt(signalStr);
-
-                if (ssid === targetEssid && !isNaN(signal)) {
-                    return signal;
-                }
-            }
-            return found;
-        }, 0);
-
-        return signalStrength;
-    }
-
-    function parseBandwidth(text) {
-        const lines = text.split('\n');
-        const interfaceName = root.interfaceName;
-        const interfaceLine = lines.find(line => line.trim().startsWith(interfaceName + ':'));
-
-        if (!interfaceLine)
-            return null;
-
-        const parts = interfaceLine.trim().split(/\s+/);
-        if (parts.length < 10)
-            return null;
-
-        const rxBytes = parseInt(parts[1]);
-        const txBytes = parseInt(parts[9]);
-
-        return {
-            rxBytes,
-            txBytes
-        };
-    }
-
-    function formatBandwidth(bytesPerSecond) {
-        if (bytesPerSecond === 0)
-            return "0B";
-
-        const units = ['B', 'K', 'M', 'G'];
-        const k = 1024;
-        const i = Math.floor(Math.log(bytesPerSecond) / Math.log(k));
-
-        return `${(bytesPerSecond / Math.pow(k, i)).toFixed(1)}${units[i]}`;
-    }
-
-    function formatBandwidthBits(bitsPerSecond) {
-        if (bitsPerSecond === 0)
-            return "0b";
-
-        const units = ['b', 'K', 'M', 'G'];
-        const k = 1000;
-        const i = Math.floor(Math.log(bitsPerSecond) / Math.log(k));
-
-        return `${(bitsPerSecond / Math.pow(k, i)).toFixed(1)}${units[i]}`;
     }
 
     function launchWifiMenu() {

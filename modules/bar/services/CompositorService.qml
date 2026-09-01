@@ -10,11 +10,10 @@ Singleton {
 
     signal workspacesUpdated(var workspaces)
     signal windowUpdated(var windowInfo)
-    signal error(string message, var error)
+    signal error(string message)
 
     property string detectedCompositor: ""
     property var activeService: null
-    property bool active: false
 
     property var niriService: NiriService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
@@ -31,53 +30,30 @@ Singleton {
     property var hyprlandService: HyprlandService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
         onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
-        onError: (message, error) => root.error(`HyprlandService: ${message}`, error)
+        onError: message => root.error(`HyprlandService: ${message}`)
     }
 
-    function activate() {
-        if (active)
-            return;
+    Component.onCompleted: activate()
 
+    function activate() {
         const compositor = detectCompositor();
         detectedCompositor = compositor;
 
-        switch (compositor) {
-        case "niri":
-            Logger.info("CompositorService", "Using Niri service");
-            activeService = niriService;
-            break;
-        case "hyprland":
-            Logger.info("CompositorService", "Using Hyprland service");
-            activeService = hyprlandService;
-            break;
-        case "mango":
-            Logger.info("CompositorService", "Using Mango service");
-            activeService = mangoService;
-            break;
-        default:
-            error(`Unsupported compositor: ${compositor}`);
+        const services = {
+            "niri": niriService,
+            "hyprland": hyprlandService,
+            "mango": mangoService
+        };
+
+        activeService = services[compositor];
+
+        if (!activeService) {
+            error(`No supported compositor detected (tried: ${Object.keys(services).join(", ")})`);
             return;
         }
 
-        if (activeService) {
-            activeService.activate();
-            active = true;
-        }
-    }
-
-    function deactivate() {
-        Logger.info("CompositorService", "Deactivating compositor service");
-
-        if (!active)
-            return;
-
-        if (activeService) {
-            activeService.deactivate();
-            activeService = null;
-        }
-
-        active = false;
-        detectedCompositor = "";
+        Logger.info("CompositorService", `Using {0} service`, compositor);
+        activeService.activate();
     }
 
     function switchToWorkspace(workspaceId) {
@@ -86,16 +62,6 @@ Singleton {
         } else {
             error("No active compositor service");
         }
-    }
-
-    function refreshWorkspaces() {
-        if (activeService) {
-            activeService.refreshWorkspaces();
-        }
-    }
-
-    function getWorkspaces() {
-        return activeService ? activeService.workspaces : null;
     }
 
     function detectCompositor() {
@@ -126,7 +92,7 @@ Singleton {
             }
         }
 
-        Logger.warn("CompositorService", "Could not detect compositor, fallbacking to niri");
-        return "niri";
+        Logger.error("CompositorService", "Could not detect any compositor");
+        return "";
     }
 }

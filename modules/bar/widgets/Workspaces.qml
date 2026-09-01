@@ -32,8 +32,8 @@ BarWidget {
             root.updateWorkspacesModel(workspaces);
         }
 
-        function onError(message, error) {
-            Logger.errorf("Workspaces", `Compositor error: {0}\n{1}`, message, error);
+        function onError(message) {
+            Logger.errorf("Workspaces", `Compositor error: {0}`, message);
         }
     }
 
@@ -107,7 +107,4 @@ BarWidget {
         }
     }
 
-    Component.onCompleted: {
-        CompositorService.activate();
-    }
 }

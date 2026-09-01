@@ -5,19 +5,19 @@ import Quickshell
 Singleton {
     id: root
 
-    property var logoutMenuEl: null
-    property var lockScreenEl: null
-    property var notificationPanelEl: null
+    property bool logoutOpen: false
+    property bool lockOpen: false
+    property bool notificationsOpen: false
 
-    function toggleLogoutMenu() {
-        root.logoutMenuEl.isVisible = !root.logoutMenuEl.isVisible;
+    function toggleLogoutMenu(): void {
+        root.logoutOpen = !root.logoutOpen;
     }
 
-    function toggleLockScreen() {
-        root.lockScreenEl.active = !root.lockScreenEl.active;
+    function toggleLockScreen(): void {
+        root.lockOpen = !root.lockOpen;
     }
 
-    function toggleNotificationPanel() {
-        root.notificationPanelEl.visible = !root.notificationPanelEl.visible;
+    function toggleNotificationPanel(): void {
+        root.notificationsOpen = !root.notificationsOpen;
     }
 }

@@ -3,6 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "dedupe.js" as Dedupe
+import "mango.js" as MangoParser
 import qs.shared
 
 Item {
@@ -15,8 +17,8 @@ Item {
 
     // Properties
     property bool active: false
-    property var _lastTagsState: null
-    property var _lastClientState: null
+    property var _lastWorkspaceState: null
+    property var _lastWindowState: null
 
     // Mango IPC focused client
     Process {
@@ -74,25 +76,15 @@ Item {
             if (!output)
                 return;
 
-            const {
-                all_tags: allTags
-            } = JSON.parse(output);
+            const workspaces = MangoParser.parseWorkspaces(output);
 
-            // no flatmap?
-            const tags = allTags.reduce((tags, monitorTags) => tags.concat(monitorTags.tags), []).map(tag => ({
-                        id: tag.index,
-                        isActive: tag["is_active"],
-                        isUrgent: tag["is_urgent"]
-                    }));
-
-            if (!isTagsEqual(tags, _lastTagsState)) {
-                Logger.debugf("MangoService", "Workspaces updated ({0} workspaces)", _lastTagsState?.length);
-                Logger.table(tags);
-                _lastTagsState = tags;
-                workspacesUpdated(tags);
+            if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
+                Logger.debugf("MangoService", "Workspaces updated ({0} workspaces)", workspaces.length);
+                _lastWorkspaceState = workspaces;
+                workspacesUpdated(workspaces);
             }
         } catch (e) {
-            error(`Error parsing tags`, e);
+            error(`Error parsing tags: ${e}`);
         }
     }
 
@@ -101,38 +93,16 @@ Item {
             if (!output)
                 return;
 
-            const data = JSON.parse(output);
+            const windowInfo = MangoParser.parseFocusedWindow(output);
 
-            const activeClient = {
-                appId: data.appid,
-                title: data.title
-            };
-
-            if (!isClientsEqual(activeClient, _lastClientState)) {
-                Logger.debugf("MangoService", "Client updated: {0} ({1})", activeClient.title, activeClient.appId);
-                _lastClientState = activeClient;
-                windowUpdated(activeClient);
+            if (!Dedupe.windowsEqual(windowInfo, _lastWindowState)) {
+                Logger.debugf("MangoService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
+                _lastWindowState = windowInfo;
+                windowUpdated(windowInfo);
             }
         } catch (e) {
-            error(`Error parsing focused client`, e);
+            error(`Error parsing focused client: ${e}`);
         }
-    }
-
-    function isClientsEqual(clientA, clientB) {
-        if (!clientA || !clientB)
-            return !clientA && !clientB;
-
-        return clientA.appId === clientB.appId && clientA.title === clientB.title;
-    }
-
-    function isTagsEqual(tagsA, tagsB) {
-        if (!tagsA || !tagsB || tagsA.length !== tagsB.length)
-            return false;
-
-        return tagsA.every((tagA, index) => {
-            const tagB = tagsB[index];
-            return tagA.id === tagB.id && tagA.isActive === tagB.isActive && tagA.isUrgent === tagB.isUrgent;
-        });
     }
 
     function detect() {

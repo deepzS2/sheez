@@ -9,7 +9,6 @@ import "widgets"
 Variants {
     id: root
 
-    property bool isVisible: false
     property color backgroundColor: Qt.alpha(Colors.background, 0.85)
     property color buttonColor: Colors.surfaceContainerLow
     property color buttonTextColor: Colors.conSurface
@@ -50,23 +49,19 @@ Variants {
 
     signal keyPressed(int key)
 
-    Component.onCompleted: {
-        PanelService.logoutMenuEl = this;
-    }
-
     model: Quickshell.screens
 
     delegate: Loader {
         id: loader
 
-        active: root.isVisible
+        active: PanelService.logoutOpen
         property var modelData
 
         // qmllint disable uncreatable-type
         sourceComponent: PanelWindow {
             id: logoutPanel
 
-            visible: root.isVisible
+            visible: PanelService.logoutOpen
 
             screen: loader.modelData
 
@@ -80,7 +75,7 @@ Variants {
                 focus: true
                 Keys.onPressed: event => {
                     if (event.key == Qt.Key_Escape) {
-                        root.isVisible = false;
+                        PanelService.logoutOpen = false;
                         return;
                     }
 
@@ -101,7 +96,7 @@ Variants {
 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: root.isVisible = false
+                    onClicked: PanelService.logoutOpen = false
 
                     UpperText {
                         anchors.bottom: buttonsLayout.top

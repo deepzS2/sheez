@@ -35,7 +35,7 @@ Singleton {
     function clearHistory(): void {
         Logger.info("NotificationContext", "Clearing notification history");
         history = [];
-        PanelService.toggleNotificationPanel();
+        PanelService.notificationsOpen = false;
     }
 
     function removeFromHistory(index: int): void {

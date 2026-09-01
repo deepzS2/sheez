@@ -23,7 +23,7 @@ PanelWindow {
         right: 12
     }
 
-    visible: false
+    visible: PanelService.notificationsOpen
     implicitWidth: Styles.notificationCenterWidth
     implicitHeight: centerCol.implicitHeight + 24
     color: "transparent"
@@ -127,10 +127,5 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    Component.onCompleted: {
-        Logger.debug("NotificationCenterPanel", "Panel initialized");
-        PanelService.notificationPanelEl = this;
     }
 }
