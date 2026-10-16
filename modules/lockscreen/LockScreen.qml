@@ -1,34 +1,31 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import Quickshell
 import Quickshell.Wayland
 import qs.shared
 import qs.modules.lockscreen.services
 import qs.modules.lockscreen.widgets
 
-Loader {
+Scope {
     id: root
-    active: PanelService.lockOpen
 
-    sourceComponent: Item {
-        LockContext {
-            id: lockContext
+    LockContext {
+        id: lockContext
 
-            onUnlocked: {
-                lock.locked = false;
-                PanelService.lockOpen = false;
-            }
+        onUnlocked: {
+            PanelService.lockOpen = false;
         }
+    }
 
-        WlSessionLock {
-            id: lock
+    WlSessionLock {
+        id: lock
 
-            locked: true
+        locked: PanelService.lockOpen
 
-            WlSessionLockSurface {
-                LockSurface {
-                    anchors.fill: parent
-                    context: lockContext
-                }
+        WlSessionLockSurface {
+            LockSurface {
+                anchors.fill: parent
+                context: lockContext
             }
         }
     }
