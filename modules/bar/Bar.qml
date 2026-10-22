@@ -73,6 +73,8 @@ Scope {
                         NetworkSpeed {}
                     }
 
+                    Tray {}
+
                     Battery {}
 
                     Power {}
