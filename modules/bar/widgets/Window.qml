@@ -16,6 +16,9 @@ BarWidget {
     borderColor: "transparent"
     implicitWidth: windowLayout.implicitWidth + Styles.widgetPadding * 2
 
+    // Output this bar instance sits on (set by Bar.qml)
+    property string output: ""
+
     property var currentWindow: null
     property string displayText: ""
     property string fullTitle: ""
@@ -27,8 +30,10 @@ BarWidget {
     Connections {
         target: CompositorService
 
-        function onWindowUpdated(windowInfo) {
-            root.updateWindow(windowInfo);
+        function onWorkspacesUpdated(workspaces) {
+            // Focused window of this output = active window of its active workspace
+            const active = workspaces.find(workspace => workspace.output === root.output && workspace.isActive);
+            root.updateWindow(active?.activeWindow || null);
         }
 
         function onError(message) {

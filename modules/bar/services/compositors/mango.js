@@ -1,27 +1,35 @@
+// Tag indexes are per-output (two outputs can both have tag 1), so the
+// workspace id is a composite "monitor:index". The active client of each
+// monitor is joined onto its active tag as `activeWindow` by MangoService.
 function parseWorkspaces(output) {
     const { all_tags: allTags } = JSON.parse(output);
 
-    // Mango tags have no names; they are identified by index alone
-    return allTags
-        .reduce(
-            (workspaces, monitorTags) => workspaces.concat(monitorTags.tags),
-            [],
-        )
-        .map((tag) => ({
-            id: tag.index,
-            name: "",
-            isActive: tag["is_active"],
-            isUrgent: tag["is_urgent"],
-            isOccupied: (tag["client_count"] || 0) > 0,
-        }));
+    return allTags.reduce(
+        (acc, monitorTags) =>
+            acc.concat(
+                monitorTags.tags.map((tag) => ({
+                    id: `${monitorTags.monitor}:${tag.index}`,
+                    output: monitorTags.monitor,
+                    name: "",
+                    isActive: tag["is_active"],
+                    isUrgent: tag["is_urgent"],
+                    isOccupied: (tag["client_count"] || 0) > 0,
+                })),
+            ),
+        [],
+    );
 }
 
-function parseFocusedWindow(output) {
-    const data = JSON.parse(output);
+function parseMonitors(output) {
+    const { monitors } = JSON.parse(output);
 
-    return {
-        title: data.title || "",
-        appId: data.appid || "",
-        isFocused: true,
-    };
+    return monitors.map((monitor) => ({
+        name: monitor.name,
+        activeClient: monitor.active_client
+            ? {
+                  title: monitor.active_client.title || "",
+                  appId: monitor.active_client.appid || "",
+              }
+            : null,
+    }));
 }

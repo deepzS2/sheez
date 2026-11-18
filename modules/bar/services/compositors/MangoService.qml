@@ -12,26 +12,26 @@ Item {
 
     // Signals for workspace updates
     signal workspacesUpdated(var workspaces)
-    signal windowUpdated(var windowInfo)
     signal error(string message)
 
     // Properties
     property bool active: false
     property var _lastWorkspaceState: null
-    property var _lastWindowState: null
+    property var _lastMonitors: null
+    property var _lastJoinedState: null
 
-    // Mango IPC focused client
+    // Per-monitor active clients (focused window on each output)
     Process {
-        id: mangoFocusedClientProcess
+        id: mangoMonitorsProcess
         running: root.active
-        command: ["mmsg", "watch", "focusing-client"]
+        command: ["mmsg", "watch", "all-monitors"]
         onRunningChanged: if (!running && root.active)
             running = true
         stdout: SplitParser {
             splitMarker: "\n"
 
             onRead: data => {
-                root.parseMangoFocusedClient(data);
+                root.parseMangoMonitors(data);
             }
         }
     }
@@ -62,10 +62,16 @@ Item {
         active = false;
     }
 
+    // workspaceId is the composite "<monitor>:<tagIndex>"
     function switchToWorkspace(workspaceId) {
-        Logger.infof("MangoService", "Switching to workspace {0}", workspaceId);
+        const separator = workspaceId.lastIndexOf(":");
+        const monitor = workspaceId.substring(0, separator);
+        const tag = workspaceId.substring(separator + 1);
+        Logger.infof("MangoService", "Switching to workspace {0} on {1}", tag, monitor);
 
-        Quickshell.execDetached(["mmsg", "-t", workspaceId]);
+        // Plain `view,<n>` acts on the focused monitor only; this targets the
+        // monitor whose bar was clicked
+        Quickshell.execDetached(["mmsg", "dispatch", `viewcrossmon,${tag},${monitor}`]);
     }
 
     function refreshWorkspaces() {
@@ -81,27 +87,47 @@ Item {
             if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
                 Logger.debugf("MangoService", "Workspaces updated ({0} workspaces)", workspaces.length);
                 _lastWorkspaceState = workspaces;
-                workspacesUpdated(workspaces);
+                emitJoinedWorkspaces();
             }
         } catch (e) {
             error(`Error parsing tags: ${e}`);
         }
     }
 
-    function parseMangoFocusedClient(output) {
+    function parseMangoMonitors(output) {
         try {
             if (!output)
                 return;
 
-            const windowInfo = MangoParser.parseFocusedWindow(output);
+            const monitors = MangoParser.parseMonitors(output);
 
-            if (!Dedupe.windowsEqual(windowInfo, _lastWindowState)) {
-                Logger.debugf("MangoService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
-                _lastWindowState = windowInfo;
-                windowUpdated(windowInfo);
+            if (!Dedupe.monitorsEqual(monitors, _lastMonitors)) {
+                _lastMonitors = monitors;
+                emitJoinedWorkspaces();
             }
         } catch (e) {
-            error(`Error parsing focused client: ${e}`);
+            error(`Error parsing monitors: ${e}`);
+        }
+    }
+
+    // Joins the active tag of each monitor with that monitor's active client
+    function emitJoinedWorkspaces() {
+        if (_lastWorkspaceState === null || _lastMonitors === null)
+            return;
+
+        const monitorsByName = {};
+        _lastMonitors.forEach(monitor => monitorsByName[monitor.name] = monitor);
+
+        const joined = _lastWorkspaceState.map((workspace) => {
+            const monitor = monitorsByName[workspace.output];
+            return Object.assign({}, workspace, {
+                activeWindow: workspace.isActive && monitor ? monitor.activeClient : null
+            });
+        });
+
+        if (!Dedupe.workspacesEqual(joined, _lastJoinedState)) {
+            _lastJoinedState = joined;
+            workspacesUpdated(joined);
         }
     }
 

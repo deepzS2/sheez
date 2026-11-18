@@ -40,8 +40,8 @@ Scope {
                     spacing: Styles.marginSize
 
                     Distro {}
-                    Workspaces {}
-                    Window {}
+                    Workspaces { output: modelData.name }
+                    Window { output: modelData.name }
                 }
 
                 RowLayout {

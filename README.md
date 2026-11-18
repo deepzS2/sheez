@@ -8,7 +8,7 @@ Sheez is a minimal, extensible desktop bar built with [Quickshell](https://git.o
 ## Features
 
 - **Smooth animations**: Polished transitions and hover effects
-- **Supported compositors**: [Niri](https://niri-wm.github.io/niri/), [Hyprland](https://hypr.land/) and [Mango](https://mangowm.github.io/)
+- **Supported compositors**: [Niri](https://niri-wm.github.io/niri/) and [Mango](https://mangowm.github.io/)
 - **Dynamic theming**: Automatic color generation from wallpapers using [matugen](https://github.com/InioX/matugen)
 - **Logout Menu**: Power management interface providing shutdown, reboot, lock, suspend, and logout options with keyboard shortcuts
 - **Lockscreen**: Secure session locking with Wayland protocol support
@@ -27,7 +27,7 @@ Sheez is a minimal, extensible desktop bar built with [Quickshell](https://git.o
 
 - Matugen
 - Nix with flakes enabled
-- Wayland compositor (Hyprland, Niri or Mango)
+- Wayland compositor (Niri or Mango)
 
 ### Setup matugen
 

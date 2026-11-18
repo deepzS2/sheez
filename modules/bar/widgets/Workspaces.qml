@@ -14,8 +14,12 @@ BarWidget {
     // borderColor: Colors.outline
     implicitWidth: workspacesRow.implicitWidth + Styles.widgetPadding * 2
 
+    // Output this bar instance sits on (set by Bar.qml); empty shows all
+    property string output: ""
+
     // Workspace data model
     property list<var> workspaces: []
+    property var outputWorkspaces: workspaces.filter(workspace => !output || workspace.output === output)
     property var workspaceIcons: ({
             "code": "",
             "browser": "",
@@ -43,7 +47,7 @@ BarWidget {
         spacing: 6
 
         Repeater {
-            model: root.workspaces
+            model: root.outputWorkspaces
 
             Rectangle {
                 id: workspaceButton

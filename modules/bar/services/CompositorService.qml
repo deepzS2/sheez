@@ -9,7 +9,6 @@ Singleton {
     id: root
 
     signal workspacesUpdated(var workspaces)
-    signal windowUpdated(var windowInfo)
     signal error(string message)
 
     property string detectedCompositor: ""
@@ -17,20 +16,12 @@ Singleton {
 
     property var niriService: NiriService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
-        onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
         onError: message => root.error(`NiriService: ${message}`)
     }
 
     property var mangoService: MangoService {
         onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
-        onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
         onError: message => root.error(`MangoService: ${message}`)
-    }
-
-    property var hyprlandService: HyprlandService {
-        onWorkspacesUpdated: workspaces => root.workspacesUpdated(workspaces)
-        onWindowUpdated: windowInfo => root.windowUpdated(windowInfo)
-        onError: message => root.error(`HyprlandService: ${message}`)
     }
 
     Component.onCompleted: activate()
@@ -41,7 +32,6 @@ Singleton {
 
         const services = {
             "niri": niriService,
-            "hyprland": hyprlandService,
             "mango": mangoService
         };
 
@@ -71,10 +61,6 @@ Singleton {
             {
                 name: "niri",
                 service: niriService
-            },
-            {
-                name: "hyprland",
-                service: hyprlandService
             },
             {
                 name: "mango",

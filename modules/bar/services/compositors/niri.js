@@ -6,24 +6,25 @@ function parseWorkspaces(output) {
         .sort((a, b) => a.idx - b.idx)
         .map((item) => ({
             id: item.id,
+            output: item.output ?? "",
             name: item.name ?? "",
             isActive: item.is_active ?? false,
             isUrgent: item.is_urgent ?? false,
             isOccupied: !Number.isNaN(item.is_occupied),
+            activeWindowId: item.active_window_id ?? null,
         }));
 }
 
-function parseFocusedWindow(output) {
+// Full window list; joined into workspaces as `activeWindow` by NiriService
+function parseWindows(output) {
     const data = JSON.parse(output);
     if (!Array.isArray(data)) throw new Error("Invalid Niri Windows Output");
 
-    const focusedWindow = data.find((window) => window.is_focused);
-
-    return {
-        title: focusedWindow?.title || "",
-        appId: focusedWindow?.app_id || "",
-        isFocused: !!focusedWindow,
-    };
+    return data.map((item) => ({
+        id: item.id,
+        title: item.title || "",
+        appId: item.app_id || "",
+    }));
 }
 
 function parseEventName(output) {

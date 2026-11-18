@@ -12,14 +12,13 @@ Item {
 
     // Signals for workspace updates
     signal workspacesUpdated(var workspaces)
-    signal windowUpdated(var windowInfo)
     signal error(string message)
 
     // Properties
     property bool active: false
     property var _lastWorkspaceState: null
-    property var currentWindow: null
-    property var _lastWindowState: null
+    property var _lastWindows: null
+    property var _lastJoinedState: null
 
     // Niri IPC socket watcher
     Process {
@@ -56,6 +55,28 @@ Item {
             onStreamFinished: {
                 root.parseWindows(this.text);
             }
+        }
+    }
+
+    // Joins each active workspace with the window focused on it
+    function emitJoinedWorkspaces() {
+        if (_lastWorkspaceState === null)
+            return;
+
+        const windows = _lastWindows || [];
+        const joined = _lastWorkspaceState.map((workspace) => {
+            if (!workspace.isActive)
+                return workspace;
+
+            const active = windows.find(window => window.id === workspace.activeWindowId);
+            return Object.assign({}, workspace, {
+                activeWindow: active ? { title: active.title, appId: active.appId } : null
+            });
+        });
+
+        if (!Dedupe.workspacesEqual(joined, _lastJoinedState)) {
+            _lastJoinedState = joined;
+            workspacesUpdated(joined);
         }
     }
 
@@ -102,7 +123,7 @@ Item {
             if (!Dedupe.workspacesEqual(workspaces, _lastWorkspaceState)) {
                 Logger.debugf("NiriService", "Workspaces updated ({0} workspaces)", workspaces.length);
                 _lastWorkspaceState = workspaces;
-                workspacesUpdated(workspaces);
+                emitJoinedWorkspaces();
             }
         } catch (e) {
             error(`Failed to parse workspace data: ${e}`);
@@ -111,13 +132,11 @@ Item {
 
     function parseWindows(output) {
         try {
-            const windowInfo = NiriParser.parseFocusedWindow(output);
+            const windows = NiriParser.parseWindows(output);
 
-            if (!Dedupe.windowsEqual(windowInfo, _lastWindowState)) {
-                Logger.debugf("NiriService", "Window updated: {0} ({1})", windowInfo.title, windowInfo.appId);
-                _lastWindowState = windowInfo;
-                currentWindow = windowInfo;
-                windowUpdated(windowInfo);
+            if (!Dedupe.windowsEqual(windows, _lastWindows)) {
+                _lastWindows = windows;
+                emitJoinedWorkspaces();
             }
         } catch (e) {
             error(`Failed to parse window data: ${e}`);
