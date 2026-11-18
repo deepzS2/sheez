@@ -1,52 +1,57 @@
 import QtQuick
-import Quickshell
 import Quickshell.Io
 import qs.modules.bar.services
 import qs.shared
 import qs.components
 
-BarWidget {
-    id: root
+// Not created when the machine has no backlight device (e.g. desktop)
+Loader {
+    active: BrightnessService.backlightDevice !== ""
+    visible: active // RowLayout: invisible item não gera spacing
 
-    componentName: "Brightness"
-    implicitWidth: brightnessText.implicitWidth + Styles.widgetPadding * 2
+    sourceComponent: BarWidget {
+        id: root
 
-    // Brightness properties
-    property real delta: 0
-    readonly property var icons: ["󱃓", "󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥", "󰖨"]
+        componentName: "Brightness"
+        implicitWidth: brightnessText.implicitWidth + Styles.widgetPadding * 2
 
-    Text {
-        id: brightnessText
-        anchors.centerIn: parent
-        font: Styles.systemFont
-        color: Colors.conSurface
+        // Brightness properties
+        property real delta: 0
+        readonly property var icons: ["󱃓", "󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥", "󰖨"]
 
-        text: {
-            const percentage = Math.round((BrightnessService.currentBrightness / BrightnessService.maxBrightness) * 100);
-            const iconIndex = Math.min(9, Math.floor(percentage / 10));
+        Text {
+            id: brightnessText
+            anchors.centerIn: parent
+            font: Styles.systemFont
+            color: Colors.conSurface
 
-            return `${root.icons[iconIndex]} ${percentage}%`;
+            text: {
+                const percentage = Math.round((BrightnessService.currentBrightness / BrightnessService.maxBrightness) * 100);
+                const iconIndex = Math.min(9, Math.floor(percentage / 10));
+
+                return `${root.icons[iconIndex]} ${percentage}%`;
+            }
         }
-    }
 
-    Timer {
-        id: adjustBrightnessTimer
-        interval: 100
-        onTriggered: () => BrightnessService.adjustBrightness(root.delta)
-    }
+        Timer {
+            id: adjustBrightnessTimer
+            interval: 100
+            onTriggered: () => BrightnessService.adjustBrightness(root.delta)
+        }
 
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onWheel: wheel => {
-            if (wheel.angleDelta.y === 0)
-                return;
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onWheel: wheel => {
+                if (wheel.angleDelta.y === 0)
+                    return;
 
-            const percentage = 0.02;
-            root.delta = wheel.angleDelta.y > 0 ? percentage : -percentage;
+                const percentage = 0.02;
+                root.delta = wheel.angleDelta.y > 0 ? percentage : -percentage;
 
-            adjustBrightnessTimer.start();
+                adjustBrightnessTimer.start();
+            }
         }
     }
 }
