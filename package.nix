@@ -8,8 +8,8 @@
   # runtime
   brightnessctl,
   networkmanagerapplet,
-  pavucontrol,
   blueman,
+  wiremix,
   # fonts
   nerd-fonts,
   atkinson-hyperlegible-next,
@@ -18,11 +18,11 @@
   runtimeDeps = [
     brightnessctl
     networkmanagerapplet
-    pavucontrol
     blueman
     nerd-fonts.iosevka
     atkinson-hyperlegible-next
     texlivePackages.alfaslabone
+    wiremix
   ];
 
   fontconfig = makeFontsConf {

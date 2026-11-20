@@ -31,7 +31,7 @@ BarWidget {
             if (mouse.button === Qt.LeftButton) {
                 AudioService.toggleSinkMute();
             } else if (mouse.button === Qt.RightButton) {
-                AudioService.launchPavucontrol();
+                AudioService.launchMixer();
             }
         }
 

@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 import qs.shared
 
@@ -38,6 +39,9 @@ Singleton {
         const status = sourceMuted ? "Muted" : `${vol}%`;
         return `Source: ${status}`;
     }
+
+    // Terminal argv to launch wiremix, resolved at startup
+    property var terminalCommand: []
 
     // Sink methods
     function toggleSinkMute() {
@@ -105,10 +109,47 @@ Singleton {
         Logger.debugf("AudioService", "Source volume set to: {0}%", Math.round(volume * 100));
     }
 
-    // Launch pavucontrol
-    function launchPavucontrol() {
-        Quickshell.execDetached(["pavucontrol"]);
-        Logger.info("AudioService", "Launched pavucontrol");
+    function launchMixer() {
+        if (terminalCommand.length === 0) {
+            Logger.warn("AudioService", "No terminal available to launch mixer");
+            return;
+        }
+
+        Quickshell.execDetached(terminalCommand);
+        Logger.info("AudioService", "Launched mixer");
+    }
+
+    Process {
+        id: terminalProbe
+        running: true
+
+        command: ["sh", "-c", `
+            if command -v foot >/dev/null 2>&1; then
+                echo '["foot","-T","wiremix","wiremix"]'
+            elif command -v kitty >/dev/null 2>&1; then
+                echo '["kitty","--title","wiremix","wiremix"]'
+            elif command -v alacritty >/dev/null 2>&1; then
+                echo '["alacritty","--title","wiremix","wiremix"]'
+            elif command -v ghostty >/dev/null 2>&1; then
+                echo '["ghostty","--title","wiremix","wiremix"]'
+            fi
+        `]
+
+        stdout: StdioCollector {
+            onStreamFinished: () => {
+                try {
+                    root.terminalCommand = JSON.parse(this.text);
+                    Logger.debugf("AudioService", "Mixer terminal: {0}", root.terminalCommand[0]);
+                } catch (e) {
+                    Logger.warn("AudioService", "Failed to parse terminal probe output: " + e);
+                }
+            }
+        }
+
+        onExited: {
+            if (root.terminalCommand.length === 0)
+                Logger.warn("AudioService", "No known terminal found — wiremix launcher disabled");
+        }
     }
 
     // Object trackers for automatic updates
